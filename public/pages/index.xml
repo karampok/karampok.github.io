@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+      <title>Pages on karampok </title>
+      <generator uri="https://hugo.spf13.com">Hugo</generator>
+    <link>http://192.168.1.106:1313/pages/index.xml/</link>
+    <language>en-us</language>
+    
+    
+    <updated>Wed, 09 Apr 2014 00:00:00 UTC</updated>
+    
+    <item>
+      <title>About Me</title>
+      <link>http://192.168.1.106:1313/pages/about/</link>
+      <pubDate>Wed, 09 Apr 2014 00:00:00 UTC</pubDate>
+      
+      <guid>http://192.168.1.106:1313/pages/about/</guid>
+      <description>&lt;p&gt;I am a Full-Stack Engineer, who enjoys facing new challenges and working on
+solutions that guarantee a stable and efficient environment. I am an open
+source and Linux hands-on enthusiast, but most importantly a computer engineer
+with a wide range of skills.&lt;/p&gt;
+
+&lt;p&gt;I always try to stay open to new concepts, get updated with new technologies
+and produce original ideas. I try to adapt myself in a constantly changing
+environment, while my strong security-oriented background and my passion for
+detail helps me to stay focused and develop myself not only independently but
+also as part of a team.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://192.168.1.106:1313/pages/cv/</link>
+      <pubDate>Tue, 01 Jan 2008 00:00:00 UTC</pubDate>
+      
+      <guid>http://192.168.1.106:1313/pages/cv/</guid>
+      <description>&lt;p&gt;My CV&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

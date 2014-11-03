@@ -1,0 +1,25 @@
+languageCode = "en-us"
+contentdir = "content"
+publishdir = "public"
+builddrafts = false
+baseurl = "http://karampok.me"
+canonifyurls = true
+title = "karampok"
+author = "Konstantinos Karampogias"
+
+[indexes]
+   category = "categories"
+   tag = "tags"
+   other = "other"
+[Params]
+  AuthorName = "Konstantinos"
+  github = "karampok"
+  twitter = "karampok"
+  email = "karampok@gmail.com"
+  description = "a description that fits"
+  cv = "/resume/cv"
+  about = "/pages/about"
+  muut = "MUUT"
+  linkedin = "kkarampogias"
+  cover = "/images/background-cover.jpg"
+  logo = "/images/logo-1.jpg"

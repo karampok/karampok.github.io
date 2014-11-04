@@ -1,14 +1,27 @@
 <!doctype html>
 <html>
 	<head>
-	
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <title> {{ .Title }}  </title>
 	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, user-scalable=no, minimal-ui">
 	
-	<title>konstantinos</title>
-	
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+    <link rel="stylesheet" type="text/css" href="{{ .Site.BaseUrl }}/css/uno.min.css" />
+    <link rel="stylesheet" type="text/css" href="{{ .Site.BaseUrl }}/css/lightGallery.css" />
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.2.0/css/bootstrap.min.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/octicons/2.0.2/octicons.min.css">
+
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <!-- RSS -->
+    <link href="{{ .RSSlink }}" rel="alternate" type="application/rss+xml" title="{{ .Site.Title }}" />
+    <!-- Script -->
+    <script src="{{ .Site.BaseUrl }}/js/jquery.min.js"></script>
+    <script src="{{ .Site.BaseUrl }}/js/main.js">
+    </script>
+
 	
 	<style type="text/css">
 	@import url(
@@ -192,12 +205,17 @@ h4 span:first-child {
 	</head>
 	<body>
 	
+        {{ partial "sidebar.html" . }}
+
+        <div class="content-wrapper">
+            <div class="content-wrapper__inner">
+                <div class="post">
 	<header id="header">
 		<div class="container">
 			<div class="row">
 				<div class="col-sm-9 col-sm-push-3">
 					<h1>
-						konstantinos
+						Richard Hendriks
 					</h1>
 					<h2>
 						Programmer
@@ -216,7 +234,7 @@ h4 span:first-child {
 			<div class="row">
 			<div class="col-sm-6">
 				<strong>Email</strong>
-				<div class="email">kkarampogias@gmail.com</div>
+				<div class="email">richard.hendriks@gmail.com</div>
 			</div>
 			<div class="col-sm-6">
 				<strong>Phone</strong>
@@ -501,5 +519,8 @@ h4 span:first-child {
 
 	</div>
 	
+                </div>
+            </div>
+        </div>
 	</body>
 </html>

@@ -7,12 +7,12 @@
     <language>en-us</language>
     
     
-    <updated>Sun, 09 Nov 2014 00:00:00 UTC</updated>
+    <updated>Thu, 06 Nov 2014 00:00:00 UTC</updated>
     
     <item>
       <title>About this site</title>
       <link>http://karampok.me/post/post2/</link>
-      <pubDate>Sun, 09 Nov 2014 00:00:00 UTC</pubDate>
+      <pubDate>Thu, 06 Nov 2014 00:00:00 UTC</pubDate>
       
       <guid>http://karampok.me/post/post2/</guid>
       <description>&lt;p&gt;This site is powered by &lt;a href=&#34;https://github.com/spf13/hugo&#34;&gt;Hugo&lt;/a&gt;,  the design of
@@ -26,7 +26,7 @@ and hosted by &lt;a href=&#34;https://pages.github.com&#34;&gt;GitHub&lt;/a&gt;&
     <item>
       <title>About Go, Hugo, this site &amp; cool people</title>
       <link>http://karampok.me/post/post1/</link>
-      <pubDate>Sun, 09 Nov 2014 00:00:00 UTC</pubDate>
+      <pubDate>Thu, 06 Nov 2014 00:00:00 UTC</pubDate>
       
       <guid>http://karampok.me/post/post1/</guid>
       <description>&lt;p&gt;Learning golang can be very distractfull!&lt;/p&gt;

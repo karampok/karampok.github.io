@@ -1,0 +1,13 @@
+    {{ partial "head.html" . }}
+    <body>
+        {{ partial "sidebar.html" . }}
+        <div class="content-wrapper">
+        <div class="content-wrapper__inner">
+            <div class="mycvclass" >
+    <iframe src="{{ .Site.BaseUrl }}/cv.html" style="width:1000px;height:1000px" />
+                <div>
+            </div>
+        </div>
+    </body>
+{{ partial "script.html" .}}
+</html>

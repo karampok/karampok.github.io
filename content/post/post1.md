@@ -1,30 +1,15 @@
 +++
-title = "About Hugo"
-date = "2014-04-09"
+title = "About Go, Hugo, this site & cool people"
+date = "2014-11-06"
 menu = "main"
 +++
 
-Hugo is a static site engine written in go.
+Learning golang can be very distractfull!
 
-
-It makes use of a variety of open source projects including:
-
-* [Cobra](http://github.com/spf13/cobra)
-* [Viper](http://github.com/spf13/viper)
-* [J Walter Weatherman](http://github.com/spf13/jWalterWeatherman)
-* [Cast](http://github.com/spf13/cast)
-
-Learn more and contribute on [GitHub](https://github.com/spf13).
-
-## Setup
-
-Some fun facts about [Hugo](http://hugo.spf13.com)
-
-* Built in [Go](http://golang.org)
-* Loosely inspired by [Jekyll](http://jekyllrb.com)
-* Primarily developed by [spf13](http://spf13.com) on the train while commuting to and from Manhattan.
-* Coded in [Vim](http://vim.org) using [spf13-vim](http://vim.spf13.com)
-
-Have questions or suggestions? Feel free to [open an issue on GitHub](https://github.com/spf13/hugo/issues/new) or [ask me on Twitter](https://twitter.com/spf13).
-
-Thanks for reading!
+I have really enjoyed learning go, but i must admit that i have hard time to
+keep myself on track. There are too many interesting  projects written on go and
+everytime instead of going deeper to go, I go deeper to the projects.
+[Hugo](https://github.com/spf13/hugo) was one of that projects that made
+extremely easy to build my web page and therefore I spent some (thankfully not
+a lot) time to fix this web site. On top that, there are always cool people to tip
+how to host and improve the site in general.  

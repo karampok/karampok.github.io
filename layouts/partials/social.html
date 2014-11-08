@@ -2,7 +2,7 @@
     <ul class="navigation"> {{ if .Site.Params.twitter }}
         <!-- Twitter -->
         <li class="navigation__item">
-            <a href="http://twitter.com/{{ .Site.Params.twitter }}" title="@{{ .Site.Params.twitter }} on Twitter"> <i class='fa fa-tt'></i> <span class="label">Twitter</span> </a>
+            <a href="http://twitter.com/{{ .Site.Params.twitter }}" title="@{{ .Site.Params.twitter }} on Twitter" target="_blank"> <i class='fa fa-tt'></i> <span class="label">Twitter</span> </a>
         </li> {{ end }} {{ if .Site.Params.bitbucket }}
         <!-- Bitbucket -->
         <li class="navigation__item">
@@ -10,7 +10,7 @@
         </li> {{ end }} {{ if .Site.Params.github }}
         <!-- github -->
         <li class="navigation__item">
-            <a href="https://github.com/{{ .Site.Params.github }}" title="{{ .Site.Params.github }} on github"> <i class='fa fa-github'></i> <span class="label">Github</span> </a>
+            <a href="https://github.com/{{ .Site.Params.github }}" title="{{ .Site.Params.github }} on github" target="_blank"> <i class='fa fa-github'></i> <span class="label">Github</span> </a>
         </li> {{ end }} </br> {{ if .Site.Params.flickr }}
         <!-- Flickr -->
         <li class="navigation__item">
@@ -18,7 +18,7 @@
         </li> {{ end }} {{ if .Site.Params.linkedin }}
         <!-- Linkedin -->
         <li class="navigation__item">
-            <a href="http://ch.linkedin.com/in/{{ .Site.Params.linkedin }}" title="Linkedin"> <i class='fa fa-ll'></i> <span class="label">Linkedin</span> </a>
+            <a href="http://ch.linkedin.com/in/{{ .Site.Params.linkedin }}" title="Linkedin" target="_blank"> <i class='fa fa-ll'></i> <span class="label">Linkedin</span> </a>
         </li> {{ end }} {{ if .Site.Params.email }}
         <!-- Email -->
         <li class="navigation__item">

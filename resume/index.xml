@@ -3,7 +3,7 @@
   <channel>
       <title>Resumes on karampok </title>
       <generator uri="https://hugo.spf13.com">Hugo</generator>
-    <link>http://karampok.me/resume/index.xml/</link>
+    <link>https://karampok.me/resume/index.xml/</link>
     <language>en-us</language>
     
     
@@ -11,10 +11,10 @@
     
     <item>
       <title></title>
-      <link>http://karampok.me/resume/cv/</link>
+      <link>https://karampok.me/resume/cv/</link>
       <pubDate>Tue, 01 Jan 2008 00:00:00 UTC</pubDate>
       
-      <guid>http://karampok.me/resume/cv/</guid>
+      <guid>https://karampok.me/resume/cv/</guid>
       <description>&lt;p&gt;My CV&lt;/p&gt;
 </description>
     </item>

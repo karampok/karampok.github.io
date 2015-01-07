@@ -3,7 +3,7 @@
   <channel>
       <title>Recent Content on karampok </title>
       <generator uri="https://hugo.spf13.com">Hugo</generator>
-    <link>http://karampok.me/index.xml/</link>
+    <link>https://karampok.me/index.xml/</link>
     <language>en-us</language>
     
     
@@ -11,10 +11,10 @@
     
     <item>
       <title>About Me</title>
-      <link>http://karampok.me/pages/about/</link>
+      <link>https://karampok.me/pages/about/</link>
       <pubDate>Sun, 09 Nov 2014 00:00:00 UTC</pubDate>
       
-      <guid>http://karampok.me/pages/about/</guid>
+      <guid>https://karampok.me/pages/about/</guid>
       <description>&lt;p&gt;I am a Full-Stack Engineer, who enjoys facing new challenges and working on
 solutions that guarantee a stable and efficient environment. I am an open
 source and Linux hands-on enthusiast, but most importantly a computer engineer
@@ -37,25 +37,11 @@ also as part of a team.&lt;/p&gt;
     </item>
     
     <item>
-      <title>About this site</title>
-      <link>http://karampok.me/post/post2/</link>
-      <pubDate>Thu, 06 Nov 2014 00:00:00 UTC</pubDate>
-      
-      <guid>http://karampok.me/post/post2/</guid>
-      <description>&lt;p&gt;This site is powered by &lt;a href=&#34;https://github.com/spf13/hugo&#34;&gt;Hugo&lt;/a&gt;,  the design of
-the site was reused from &lt;a href=&#34;https://github.com/SenjinDarashiva/hugo-uno&#34;&gt;hugo-uno&lt;/a&gt;
-and hosted by &lt;a href=&#34;https://pages.github.com&#34;&gt;GitHub&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Thanks for visiting!&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
       <title>About Go, Hugo, this site &amp; cool people</title>
-      <link>http://karampok.me/post/post1/</link>
+      <link>https://karampok.me/post/post1/</link>
       <pubDate>Thu, 06 Nov 2014 00:00:00 UTC</pubDate>
       
-      <guid>http://karampok.me/post/post1/</guid>
+      <guid>https://karampok.me/post/post1/</guid>
       <description>&lt;p&gt;Learning golang can be very distractfull!!!&lt;/p&gt;
 
 &lt;p&gt;I have really enjoyed learning go, but i must admit that i have hard time to
@@ -69,11 +55,25 @@ how to host and improve the site in general.&lt;/p&gt;
     </item>
     
     <item>
+      <title>About this site</title>
+      <link>https://karampok.me/post/post2/</link>
+      <pubDate>Thu, 06 Nov 2014 00:00:00 UTC</pubDate>
+      
+      <guid>https://karampok.me/post/post2/</guid>
+      <description>&lt;p&gt;This site is powered by &lt;a href=&#34;https://github.com/spf13/hugo&#34;&gt;Hugo&lt;/a&gt;,  the design of
+the site was reused from &lt;a href=&#34;https://github.com/SenjinDarashiva/hugo-uno&#34;&gt;hugo-uno&lt;/a&gt;
+and hosted by &lt;a href=&#34;https://pages.github.com&#34;&gt;GitHub&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Thanks for visiting!&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
       <title></title>
-      <link>http://karampok.me/resume/cv/</link>
+      <link>https://karampok.me/resume/cv/</link>
       <pubDate>Tue, 01 Jan 2008 00:00:00 UTC</pubDate>
       
-      <guid>http://karampok.me/resume/cv/</guid>
+      <guid>https://karampok.me/resume/cv/</guid>
       <description>&lt;p&gt;My CV&lt;/p&gt;
 </description>
     </item>

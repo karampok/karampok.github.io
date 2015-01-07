@@ -3,18 +3,32 @@
   <channel>
       <title>Posts on karampok </title>
       <generator uri="https://hugo.spf13.com">Hugo</generator>
-    <link>http://karampok.me/post/index.xml/</link>
+    <link>https://karampok.me/post/index.xml/</link>
     <language>en-us</language>
     
     
     <updated>Thu, 06 Nov 2014 00:00:00 UTC</updated>
     
     <item>
-      <title>About Go, Hugo, this site &amp; cool people</title>
-      <link>http://karampok.me/post/post1/</link>
+      <title>About this site</title>
+      <link>https://karampok.me/post/post2/</link>
       <pubDate>Thu, 06 Nov 2014 00:00:00 UTC</pubDate>
       
-      <guid>http://karampok.me/post/post1/</guid>
+      <guid>https://karampok.me/post/post2/</guid>
+      <description>&lt;p&gt;This site is powered by &lt;a href=&#34;https://github.com/spf13/hugo&#34;&gt;Hugo&lt;/a&gt;,  the design of
+the site was reused from &lt;a href=&#34;https://github.com/SenjinDarashiva/hugo-uno&#34;&gt;hugo-uno&lt;/a&gt;
+and hosted by &lt;a href=&#34;https://pages.github.com&#34;&gt;GitHub&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Thanks for visiting!&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>About Go, Hugo, this site &amp; cool people</title>
+      <link>https://karampok.me/post/post1/</link>
+      <pubDate>Thu, 06 Nov 2014 00:00:00 UTC</pubDate>
+      
+      <guid>https://karampok.me/post/post1/</guid>
       <description>&lt;p&gt;Learning golang can be very distractfull!!!&lt;/p&gt;
 
 &lt;p&gt;I have really enjoyed learning go, but i must admit that i have hard time to
@@ -24,20 +38,6 @@ everytime instead of going deeper to go, I go deeper to the projects.
 extremely easy to build my web page and therefore I spent some (thankfully not
 a lot) time to fix this web site. On top that, there are always cool people to tip
 how to host and improve the site in general.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>About this site</title>
-      <link>http://karampok.me/post/post2/</link>
-      <pubDate>Thu, 06 Nov 2014 00:00:00 UTC</pubDate>
-      
-      <guid>http://karampok.me/post/post2/</guid>
-      <description>&lt;p&gt;This site is powered by &lt;a href=&#34;https://github.com/spf13/hugo&#34;&gt;Hugo&lt;/a&gt;,  the design of
-the site was reused from &lt;a href=&#34;https://github.com/SenjinDarashiva/hugo-uno&#34;&gt;hugo-uno&lt;/a&gt;
-and hosted by &lt;a href=&#34;https://pages.github.com&#34;&gt;GitHub&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Thanks for visiting!&lt;/p&gt;
 </description>
     </item>
     

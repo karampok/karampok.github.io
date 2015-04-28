@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-      <title>Posts on karampok </title>
-      <generator uri="https://hugo.spf13.com">Hugo</generator>
-    <link>https://karampok.me/post/index.xml/</link>
+    <title>Posts on karampok</title>
+    <link>https://karampok.me/post/</link>
+    <description>Recent content in Posts on karampok</description>
+    <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    
-    
-    <updated>Thu, 06 Nov 2014 00:00:00 UTC</updated>
+    <lastBuildDate>Thu, 06 Nov 2014 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://karampok.me/post/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>About this site</title>
       <link>https://karampok.me/post/post2/</link>
-      <pubDate>Thu, 06 Nov 2014 00:00:00 UTC</pubDate>
+      <pubDate>Thu, 06 Nov 2014 00:00:00 +0000</pubDate>
       
       <guid>https://karampok.me/post/post2/</guid>
       <description>&lt;p&gt;This site is powered by &lt;a href=&#34;https://github.com/spf13/hugo&#34;&gt;Hugo&lt;/a&gt;,  the design of
@@ -26,10 +26,10 @@ and hosted by &lt;a href=&#34;https://pages.github.com&#34;&gt;GitHub&lt;/a&gt;&
     <item>
       <title>About Go, Hugo, this site &amp; cool people</title>
       <link>https://karampok.me/post/post1/</link>
-      <pubDate>Thu, 06 Nov 2014 00:00:00 UTC</pubDate>
+      <pubDate>Thu, 06 Nov 2014 00:00:00 +0000</pubDate>
       
       <guid>https://karampok.me/post/post1/</guid>
-      <description>&lt;p&gt;Learning golang can be very distractfull!!!&lt;/p&gt;
+      <description>&lt;p&gt;Learning golang can be very distractfull !!!!&lt;/p&gt;
 
 &lt;p&gt;I have really enjoyed learning go, but i must admit that i have hard time to
 keep myself on track. There are too many interesting  projects written on go and

@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-      <title>Recent Content on karampok </title>
-      <generator uri="https://hugo.spf13.com">Hugo</generator>
-    <link>https://karampok.me/index.xml/</link>
+    <title>karampok</title>
+    <link>https://karampok.me/</link>
+    <description>Recent content on karampok</description>
+    <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    
-    
-    <updated>Sun, 09 Nov 2014 00:00:00 UTC</updated>
+    <lastBuildDate>Sun, 09 Nov 2014 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://karampok.me/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>About Me</title>
       <link>https://karampok.me/pages/about/</link>
-      <pubDate>Sun, 09 Nov 2014 00:00:00 UTC</pubDate>
+      <pubDate>Sun, 09 Nov 2014 00:00:00 +0000</pubDate>
       
       <guid>https://karampok.me/pages/about/</guid>
       <description>&lt;p&gt;I am a Full-Stack Engineer, who enjoys facing new challenges and working on
@@ -37,23 +37,9 @@ also as part of a team.&lt;/p&gt;
     </item>
     
     <item>
-      <title>About this site</title>
-      <link>https://karampok.me/post/post2/</link>
-      <pubDate>Thu, 06 Nov 2014 00:00:00 UTC</pubDate>
-      
-      <guid>https://karampok.me/post/post2/</guid>
-      <description>&lt;p&gt;This site is powered by &lt;a href=&#34;https://github.com/spf13/hugo&#34;&gt;Hugo&lt;/a&gt;,  the design of
-the site was reused from &lt;a href=&#34;https://github.com/SenjinDarashiva/hugo-uno&#34;&gt;hugo-uno&lt;/a&gt;
-and hosted by &lt;a href=&#34;https://pages.github.com&#34;&gt;GitHub&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Thanks for visiting!&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
       <title>About Go, Hugo, this site &amp; cool people</title>
       <link>https://karampok.me/post/post1/</link>
-      <pubDate>Thu, 06 Nov 2014 00:00:00 UTC</pubDate>
+      <pubDate>Thu, 06 Nov 2014 00:00:00 +0000</pubDate>
       
       <guid>https://karampok.me/post/post1/</guid>
       <description>&lt;p&gt;Learning golang can be very distractfull !!!!&lt;/p&gt;
@@ -69,9 +55,23 @@ how to host and improve the site in general.&lt;/p&gt;
     </item>
     
     <item>
+      <title>About this site</title>
+      <link>https://karampok.me/post/post2/</link>
+      <pubDate>Thu, 06 Nov 2014 00:00:00 +0000</pubDate>
+      
+      <guid>https://karampok.me/post/post2/</guid>
+      <description>&lt;p&gt;This site is powered by &lt;a href=&#34;https://github.com/spf13/hugo&#34;&gt;Hugo&lt;/a&gt;,  the design of
+the site was reused from &lt;a href=&#34;https://github.com/SenjinDarashiva/hugo-uno&#34;&gt;hugo-uno&lt;/a&gt;
+and hosted by &lt;a href=&#34;https://pages.github.com&#34;&gt;GitHub&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Thanks for visiting!&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
       <title></title>
       <link>https://karampok.me/resume/cv/</link>
-      <pubDate>Tue, 01 Jan 2008 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://karampok.me/resume/cv/</guid>
       <description>&lt;p&gt;My CV&lt;/p&gt;

@@ -1,29 +1,28 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
   
   <url>
-    <loc>https://karampok.me/</loc>
-    <lastmod>2014-11-09T00:00:00+00:00</lastmod>
+    <loc>https://karampok.me/#about</loc>
+  </url>
+  
+  <url>
+    <loc>https://karampok.me/#contact</loc>
+  </url>
+  
+  <url>
+    <loc>https://karampok.me/#</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://karampok.me/pages/about/</loc>
-    <lastmod>2014-11-09T00:00:00+00:00</lastmod>
+    <loc>https://karampok.me/#</loc>
+    <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://karampok.me/post/post1/</loc>
-    <lastmod>2014-11-06T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://karampok.me/post/post2/</loc>
-    <lastmod>2014-11-06T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://karampok.me/resume/cv/</loc>
+    <loc>https://karampok.me/#</loc>
+    <priority>0</priority>
   </url>
   
 </urlset>

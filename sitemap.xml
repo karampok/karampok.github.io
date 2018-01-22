@@ -4,10 +4,12 @@
   
   <url>
     <loc>http://www.karampok.me/</loc>
+    <lastmod>2018-01-20T12:00:00+06:00</lastmod>
   </url>
   
   <url>
     <loc>http://www.karampok.me/posts/</loc>
+    <lastmod>2018-01-20T12:00:00+06:00</lastmod>
   </url>
   
   <url>
@@ -15,7 +17,18 @@
   </url>
   
   <url>
+    <loc>http://www.karampok.me/posts/container-networking-with-cni/</loc>
+    <lastmod>2018-01-20T12:00:00+06:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://www.karampok.me/authors/</loc>
+  </url>
+  
+  <url>
+    <loc>http://www.karampok.me/tags/cni/</loc>
+    <lastmod>2018-01-20T12:00:00+06:00</lastmod>
+    <priority>0</priority>
   </url>
   
   <url>
@@ -25,6 +38,30 @@
   
   <url>
     <loc>http://www.karampok.me/tags/config/</loc>
+  </url>
+  
+  <url>
+    <loc>http://www.karampok.me/tags/container-networking/</loc>
+    <lastmod>2018-01-20T12:00:00+06:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://www.karampok.me/authors/karampok/</loc>
+    <lastmod>2018-01-20T12:00:00+06:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://www.karampok.me/tags/kubernetes/</loc>
+    <lastmod>2018-01-20T12:00:00+06:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://www.karampok.me/tags/linux/</loc>
+    <lastmod>2018-01-20T12:00:00+06:00</lastmod>
+    <priority>0</priority>
   </url>
   
   <url>
@@ -38,6 +75,7 @@
   
   <url>
     <loc>http://www.karampok.me/tags/</loc>
+    <lastmod>2018-01-20T12:00:00+06:00</lastmod>
     <priority>0</priority>
   </url>
   

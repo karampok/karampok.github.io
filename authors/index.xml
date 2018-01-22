@@ -1,13 +1,22 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Authors on karampok</title>
+    <title>Authors on Konstantinos Karampogias</title>
     <link>http://www.karampok.me/authors/</link>
-    <description>Recent content in Authors on karampok</description>
+    <description>Recent content in Authors on Konstantinos Karampogias</description>
     <generator>Hugo -- gohugo.io</generator>
     
 	<atom:link href="http://www.karampok.me/authors/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Karampok</title>
+      <link>http://www.karampok.me/authors/karampok/</link>
+      <pubDate>Sat, 20 Jan 2018 12:00:00 +0600</pubDate>
+      
+      <guid>http://www.karampok.me/authors/karampok/</guid>
+      <description></description>
+    </item>
     
   </channel>
 </rss>

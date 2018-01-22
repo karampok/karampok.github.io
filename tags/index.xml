@@ -1,13 +1,23 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Tags on karampok</title>
+    <title>Tags on Konstantinos Karampogias</title>
     <link>http://www.karampok.me/tags/</link>
-    <description>Recent content in Tags on karampok</description>
+    <description>Recent content in Tags on Konstantinos Karampogias</description>
     <generator>Hugo -- gohugo.io</generator>
+    <lastBuildDate>Sat, 20 Jan 2018 12:00:00 +0600</lastBuildDate>
     
 	<atom:link href="http://www.karampok.me/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>CNI</title>
+      <link>http://www.karampok.me/tags/cni/</link>
+      <pubDate>Sat, 20 Jan 2018 12:00:00 +0600</pubDate>
+      
+      <guid>http://www.karampok.me/tags/cni/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>Configuration</title>
@@ -15,6 +25,33 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>http://www.karampok.me/tags/config/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Container-networking</title>
+      <link>http://www.karampok.me/tags/container-networking/</link>
+      <pubDate>Sat, 20 Jan 2018 12:00:00 +0600</pubDate>
+      
+      <guid>http://www.karampok.me/tags/container-networking/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Kubernetes</title>
+      <link>http://www.karampok.me/tags/kubernetes/</link>
+      <pubDate>Sat, 20 Jan 2018 12:00:00 +0600</pubDate>
+      
+      <guid>http://www.karampok.me/tags/kubernetes/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Linux</title>
+      <link>http://www.karampok.me/tags/linux/</link>
+      <pubDate>Sat, 20 Jan 2018 12:00:00 +0600</pubDate>
+      
+      <guid>http://www.karampok.me/tags/linux/</guid>
       <description></description>
     </item>
     

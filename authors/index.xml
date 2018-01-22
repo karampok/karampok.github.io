@@ -9,14 +9,5 @@
 	<atom:link href="http://www.karampok.me/authors/index.xml" rel="self" type="application/rss+xml" />
     
     
-    <item>
-      <title>Karampok</title>
-      <link>http://www.karampok.me/authors/karampok/</link>
-      <pubDate>Sat, 20 Jan 2018 12:00:00 +0600</pubDate>
-      
-      <guid>http://www.karampok.me/authors/karampok/</guid>
-      <description></description>
-    </item>
-    
   </channel>
 </rss>

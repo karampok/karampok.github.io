@@ -5,6 +5,7 @@
     <link>http://www.karampok.me/</link>
     <description>Recent content in home on Konstantinos Karampogias</description>
     <generator>Hugo -- gohugo.io</generator>
+    <lastBuildDate>Sat, 20 Jan 2018 12:00:00 +0600</lastBuildDate>
     
 	<atom:link href="http://www.karampok.me/index.xml" rel="self" type="application/rss+xml" />
     
@@ -18,6 +19,15 @@
       <description>Software/Network Engineer, who enjoys facing new challenges and working on solutions that guarantee a stable and efficient environment. I am an open source and Linux hands-on enthusiast, but most importantly a engineer with a wide range of skills.
 Fields of Interest
 Networking, Containers, Kubernetes, Cloudfoundry Software Defined Networking (SDN) Cloud Computing/Virtualization Software Engineering in Go</description>
+    </item>
+    
+    <item>
+      <title>CNI &amp; Container Runtimes</title>
+      <link>http://www.karampok.me/posts/container-networking-with-cni/</link>
+      <pubDate>Sat, 20 Jan 2018 12:00:00 +0600</pubDate>
+      
+      <guid>http://www.karampok.me/posts/container-networking-with-cni/</guid>
+      <description>The last couple of years I have been working with containers in low level. I learned how they work under the hood and I got familiar with container standards like OCI (Open Container Initiative) and CNI (Container Network Interface). When it comes to the runtime spec, there are quite many resources which explain in detail the runtime standard. On the other hand, there are not many resources about CNI, and it has not been clear to me how the runtime engine is using the CNI standard, as well as how difficult is to write a network CNI compatible plugin.</description>
     </item>
     
   </channel>

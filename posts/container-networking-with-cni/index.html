@@ -6,7 +6,7 @@
 <meta name='viewport' content='width=device-width, initial-scale=1'>
 <meta name='description' content='The last couple of years I have been working with containers in low level. I learned how they work under the hood and I got familiar with container standards like OCI (Open Container Initiative) and CNI (Container Network Interface). When it comes to the runtime spec, there are quite many resources which explain in detail the runtime standard. On the other hand, there are not many resources about CNI, and it has not been clear to me how the runtime engine is using the CNI standard, as well as how difficult is to write a network CNI compatible plugin.'>
 
-<meta property='og:title' content='CNI &amp; Container Runtimes • Konstantinos Karampogias'>
+<meta property='og:title' content='How a Container Runtime is using CNI • Konstantinos Karampogias'>
 <meta property='og:description' content='The last couple of years I have been working with containers in low level. I learned how they work under the hood and I got familiar with container standards like OCI (Open Container Initiative) and CNI (Container Network Interface). When it comes to the runtime spec, there are quite many resources which explain in detail the runtime standard. On the other hand, there are not many resources about CNI, and it has not been clear to me how the runtime engine is using the CNI standard, as well as how difficult is to write a network CNI compatible plugin.'>
 <meta property='og:url' content='http://www.karampok.me/posts/container-networking-with-cni/'>
 <meta property='og:site_name' content='Konstantinos Karampogias'>
@@ -14,7 +14,7 @@
 
 <meta name="generator" content="Hugo 0.34" />
 
-  <title>CNI &amp; Container Runtimes • Konstantinos Karampogias</title>
+  <title>How a Container Runtime is using CNI • Konstantinos Karampogias</title>
   <link rel='canonical' href='http://www.karampok.me/posts/container-networking-with-cni/'>
   
   
@@ -67,7 +67,7 @@ ga('send', 'pageview');
     <header class='header-container'>
   <div class='header entry-header'>
     <div class='header-info'>
-      <h1 class='title'>CNI &amp; Container Runtimes</h1>
+      <h1 class='title'>How a Container Runtime is using CNI</h1>
       
 
     </div>
@@ -154,13 +154,17 @@ capability when runs.</li>
 json files are streamed to the plugin through <code>stdin</code>.</li>
 <li>Any information that is only known when the container is
 to be created (runtime variable) should be passed to the plugin via
-environmental variables.</li>
+environmental variables. Nevertheless, in the latest CNI it is also possible
+to send certain runtime config via <code>json</code> on <code>stdin</code>, especially for some
+extension &amp; optional features. More info <a href="https://github.com/containernetworking/cni/blob/master/CONVENTIONS.md" target="_blank">here</a>.</li>
 <li>The binary does not suppose to have any other input configuration outside the
 above two.</li>
 <li>The CNI plugin is responsible for wiring up the container, and is expected to
 hide the network complexity.</li>
 <li>For a CNI plugin a container is the same thing as <a href="https://goo.gl/fBCAjB" target="_blank">Linux network namespace</a>.</li>
 </ul>
+
+<p>its an advanced use case, but its also an interesting point because it means that the runtime essentially modifies the config JSON after the operators provides it, but before the plugin sees it.</p>
 
 <h2 id="container-runtime">Container Runtime</h2>
 
@@ -403,15 +407,15 @@ This can happen through multiple network configurations in <code>$NETCONFPATH</c
 
 <h1 id="take-away-notes">Take Away Notes</h1>
 
-<p>CNI is about all the actions that take place during the creation or the
-deletion of a container, it is not about realtime changes (e.g. policy
-enforcement). CNI will create all the rules to reassure a connection from/to a
-container, but is not responsible to set up the network medium, e.g. bridge
-creation or distribute routes to connect containers located in different hosts.
-CNI targets to hide the network complexity in order to make the runtime
-code-base cleaner and in the same time to enable third party providers to
-create their own plugins and integrate them easily to all container
-orchestrators that are using  CNI compatible runtime.</p>
+<p>CNI is about all the network-related actions that take place during the
+creation or the deletion of a container, it is not about realtime changes (e.g.
+policy enforcement). CNI will create all the rules to reassure a connection
+from/to a container, but it is not responsible to set up the network medium,
+e.g.  bridge creation or distribute routes to connect containers located in
+different hosts.  CNI targets to hide the network complexity in order to make
+the runtime code-base cleaner and in the same time to enable third party
+providers to create their own plugins and integrate them easily to all
+container orchestrators that are using a CNI compatible runtime.</p>
 
 <h2 id="links">Links</h2>
 
@@ -490,7 +494,7 @@ orchestrators that are using  CNI compatible runtime.</p>
         <div class='copyright'>
   <p>
 
-       &copy; 2018 Konstantinos Karampogias 
+       &copy; 2018 karampok 
   </p>
 </div>
 

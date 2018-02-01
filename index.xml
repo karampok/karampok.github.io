@@ -22,7 +22,7 @@ Networking, Containers, Kubernetes, Cloudfoundry Software Defined Networking (SD
     </item>
     
     <item>
-      <title>CNI &amp; Container Runtimes</title>
+      <title>How a Container Runtime is using CNI</title>
       <link>http://www.karampok.me/posts/container-networking-with-cni/</link>
       <pubDate>Sat, 20 Jan 2018 12:00:00 +0600</pubDate>
       

@@ -5,10 +5,19 @@
     <link>http://www.karampok.me/tags/kubernetes/</link>
     <description>Recent content in Kubernetes on Konstantinos Karampogias</description>
     <generator>Hugo -- gohugo.io</generator>
-    <lastBuildDate>Sat, 20 Jan 2018 12:00:00 +0600</lastBuildDate>
+    <lastBuildDate>Sun, 11 Feb 2018 21:06:48 +0100</lastBuildDate>
     
 	<atom:link href="http://www.karampok.me/tags/kubernetes/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Chaining CNI Plugins</title>
+      <link>http://www.karampok.me/posts/chained-plugins-cni/</link>
+      <pubDate>Sun, 11 Feb 2018 21:06:48 +0100</pubDate>
+      
+      <guid>http://www.karampok.me/posts/chained-plugins-cni/</guid>
+      <description>CNI (Container Network Interface) supports since version 0.3.0 chained plugins. This is a feature which can potential solve various cases. In the same time it keeps the container network stack clean. This post explains how chained plugins can be used in low level and how someone can extend the chain by adding a custom made CNI plugin. Whether your container orchestrator supports plugin chaining depends on which Container Runtime or which version is being used.</description>
+    </item>
     
     <item>
       <title>How a Container Runtime is using CNI</title>

@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+  <meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<meta name='description' content='CNI (Container Network Interface) supports since version 0.3.0 chained plugins. This is a feature which can potential solve various cases. In the same time it keeps the container network stack clean. This post explains how chained plugins can be used in low level and how someone can extend the chain by adding a custom made CNI plugin. Whether your container orchestrator supports plugin chaining depends on which Container Runtime or which version is being used.'>
+
+<meta property='og:title' content='Chaining CNI Plugins • Konstantinos Karampogias'>
+<meta property='og:description' content='CNI (Container Network Interface) supports since version 0.3.0 chained plugins. This is a feature which can potential solve various cases. In the same time it keeps the container network stack clean. This post explains how chained plugins can be used in low level and how someone can extend the chain by adding a custom made CNI plugin. Whether your container orchestrator supports plugin chaining depends on which Container Runtime or which version is being used.'>
+<meta property='og:url' content='http://www.karampok.me/posts/chained-plugins-cni/'>
+<meta property='og:site_name' content='Konstantinos Karampogias'>
+<meta property='og:type' content='article'><meta property='og:image' content='https://www.gravatar.com/avatar/265e87c7ecf5a798c566e9f7549fd8c6?s=256'><meta property='article:section' content='Posts'><meta property='article:tag' content='container-networking'><meta property='article:tag' content='CNI'><meta property='article:tag' content='kubernetes'><meta property='article:tag' content='Linux'><meta property='article:published_time' content='2018-02-11T21:06:48&#43;01:00'/><meta property='article:modified_time' content='2018-02-11T21:06:48&#43;01:00'/><meta name='twitter:card' content='summary'><meta name='twitter:site' content='@twitter'><meta name='twitter:creator' content='@karampok'>
+
+<meta name="generator" content="Hugo 0.36.1" />
+
+  <title>Chaining CNI Plugins • Konstantinos Karampogias</title>
+  <link rel='canonical' href='http://www.karampok.me/posts/chained-plugins-cni/'>
+  
+  
+  <link rel='icon' href='/favicon.ico'>
+<link rel='stylesheet' href='/assets/css/main.f0e8df71.css'><link rel='stylesheet' href='/css/custom.css'>
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-112175593-1', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+</head>
+
+
+<body class='page type-posts'>
+  <div class='site'>
+
+    <a class='screen-reader' href='#main'>Skip to Content</a>
+
+    <header id='header' class='header-container'>
+      <div class='header site-header'>
+        <nav id='main-menu' class='main-menu-container' aria-label='Main Menu'>
+  <ul class='main-menu'>
+  <li>
+      <a href='/'>home</a>
+    </li>
+  <li>
+      <a href='/posts/'>Posts</a>
+    </li>
+  <li>
+      <a href='/about/'>About</a>
+    </li>
+  
+  </ul>
+</nav>
+
+        <div class='header-info'>
+          
+          <p class='site-title title'>Konstantinos Karampogias</p>
+          
+          <p class='site-description subtitle'>software engineer</p>
+        </div>
+      </div>
+    </header>
+
+
+<main id='main' class='main'>
+  <article lang='en' class='entry'>
+    <header class='header-container'>
+  <div class='header entry-header'>
+    <div class='header-info'>
+      <h1 class='title'>Chaining CNI Plugins</h1>
+      
+
+    </div>
+    
+<div class='meta'>
+  <span class='posted-on'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+  <line x1="16" y1="2" x2="16" y2="6"/>
+  <line x1="8" y1="2" x2="8" y2="6"/>
+  <line x1="3" y1="10" x2="21" y2="10"/>
+  
+</svg>
+<span class='screen-reader'>Posted on </span>
+  <time class='date' datetime='2018-02-11T21:06:48&#43;01:00'>2018, Feb 11</time>
+</span>
+
+  <span class='byline'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M21,21V20c0-2.76-4-5-9-5s-9,2.24-9,5v1"/>
+  <path d="M16,6.37A4,4,0,1,1,12.63,3,4,4,0,0,1,16,6.37Z"/>
+  
+</svg>
+<span class='screen-reader'> by </span><a href='/authors/karampok'>Konstantinos Karampogias</a></span>
+  
+<span class='reading-time'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <circle cx="12" cy="12" r="10"/>
+  <polyline points="12 6 12 12 15 15"/>
+  
+</svg>
+6 mins read
+</span>
+
+
+</div>
+
+
+  </div>
+</header>
+
+    
+    
+
+    <div class='entry-content'>
+  
+
+<p>CNI (Container Network Interface) supports since version 0.3.0 chained plugins.
+This is a feature which can potential solve various cases. In the same time
+it keeps the container network stack clean. This post explains how chained
+plugins can be used in low level and how someone can extend the chain by adding
+a custom made CNI plugin. Whether your container orchestrator supports plugin
+chaining depends on which Container Runtime or which version is being used.</p>
+
+<h2 id="chained-plugins">Chained Plugins</h2>
+
+<p>Chaining CNI plugins is different from a multi-call on CNI plugins in terms that
+that each plugin call depends on an information that was created in the
+previous step. In most cases the information transferred is the container IP.</p>
+
+<p>The following figure taken for a CNI presentation illustrates plugin chaining.</p>
+
+<p><img src="/cni/chained-plugins.jpeg" alt="Chained-Plugins " /></p>
+
+<h2 id="container-runtime-behavior">Container Runtime Behavior</h2>
+
+<p>A detailed description of how a Container Runtime should chain plugins
+can be found in the <a href="https://github.com/containernetworking/cni/blob/eeded9f55ef7a23ee3b1f6cadbc8d51f879238a9/SPEC.md" target="_blank">CNI
+spec</a></p>
+
+<p>To summarize the ADD part:</p>
+
+<blockquote>
+<p>For the ADD action, the runtime MUST also add a prevResult field to the
+configuration JSON of any plugin after the first one, which MUST be the Result
+of the previous plugin (if any) in JSON format (see below). For the ADD action,
+plugins SHOULD echo the contents of the prevResult field to their stdout to
+allow subsequent plugins (and the runtime) to receive the result, unless they
+wish to modify or suppress a previous result. Plugins are allowed to modify or
+suppress all or part of a prevResult. However, plugins that support a version
+of the CNI specification that includes the prevResult field MUST handle
+prevResult by either passing it through, modifying it, or suppressing it
+explicitly. It is a violation of this specification to be unaware of the
+prevResult field.</p>
+
+<p>The runtime MUST also execute each plugin in the list with the same environment.
+For the DEL action, the runtime MUST execute the plugins in reverse-order.</p>
+</blockquote>
+
+<p>A such description will lead to the following bash script.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e">#! /bin/bash
+</span><span style="color:#75715e"></span>netconf<span style="color:#f92672">=</span><span style="color:#e6db74">`</span>cat<span style="color:#e6db74">`</span>
+version<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>echo <span style="color:#e6db74">&#34;</span>$netconf<span style="color:#e6db74">&#34;</span>| jq -r <span style="color:#e6db74">&#39;.cniVersion&#39;</span><span style="color:#66d9ef">)</span>
+name<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>echo <span style="color:#e6db74">&#34;</span>$netconf<span style="color:#e6db74">&#34;</span>| jq -r <span style="color:#e6db74">&#39;.name&#39;</span><span style="color:#66d9ef">)</span>
+res<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{}&#34;</span>
+
+entries<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>echo <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>netconf<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> | jq -cr <span style="color:#e6db74">&#39;.plugins[]  | @base64 &#39;</span><span style="color:#66d9ef">)</span>
+<span style="color:#66d9ef">if</span> <span style="color:#f92672">[</span> <span style="color:#e6db74">&#34;</span>$CNI_COMMAND<span style="color:#e6db74">&#34;</span> <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;DEL&#34;</span> <span style="color:#f92672">]</span>; <span style="color:#66d9ef">then</span> <span style="color:#75715e">#Reverse if DELETE
+</span><span style="color:#75715e"></span>	entries<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>echo <span style="color:#e6db74">&#34;</span>$entries<span style="color:#e6db74">&#34;</span>|tac<span style="color:#66d9ef">)</span> <span style="color:#75715e">#yes there is such unix command
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">fi</span>
+
+<span style="color:#66d9ef">for</span> entry in $entries; <span style="color:#66d9ef">do</span>
+      conf<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>echo <span style="color:#e6db74">&#34;</span>$entry<span style="color:#e6db74">&#34;</span> | base64 --decode | jq -r --arg n $name --arg v $version <span style="color:#e6db74">&#39;. + {name:$n, cniVersion:$v}&#39;</span><span style="color:#66d9ef">)</span>
+      echo <span style="color:#e6db74">&#34;Applying </span><span style="color:#66d9ef">$(</span>echo <span style="color:#e6db74">&#34;</span>$conf<span style="color:#e6db74">&#34;</span>| jq -r <span style="color:#e6db74">&#39;.type&#39;</span><span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span>
+      conf2<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>echo $conf | jq -r --argjson p $res <span style="color:#e6db74">&#39;. + {prevResult:$p}&#39;</span><span style="color:#66d9ef">)</span>
+      <span style="color:#75715e"># inject configuration
+</span><span style="color:#75715e"></span>      plugin<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span>$CNI_PATH<span style="color:#e6db74">&#34;</span>/<span style="color:#66d9ef">$(</span>echo <span style="color:#e6db74">&#34;</span>$conf2<span style="color:#e6db74">&#34;</span>| jq -r <span style="color:#e6db74">&#39;.type&#39;</span><span style="color:#66d9ef">)</span>
+      res<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>echo $<span style="color:#e6db74">&#34;</span>$conf2<span style="color:#e6db74">&#34;</span> | <span style="color:#e6db74">&#34;</span>$plugin<span style="color:#e6db74">&#34;</span>| jq -c .<span style="color:#66d9ef">)</span>
+      <span style="color:#66d9ef">if</span> <span style="color:#f92672">[</span> <span style="color:#e6db74">&#34;</span>$res<span style="color:#e6db74">&#34;</span> <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;&#34;</span> <span style="color:#f92672">]</span>;<span style="color:#66d9ef">then</span>
+	      res<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{}&#34;</span>
+      <span style="color:#66d9ef">fi</span>
+<span style="color:#66d9ef">done</span>
+echo  <span style="color:#e6db74">&#34;</span>$res<span style="color:#e6db74">&#34;</span>| jq .</code></pre></div>
+<p>The above script is getting too complicated and also not complete, for example <code>CNI ARGs</code>
+behavior is missing. For that reason, it is recommended to use the library
+provided by the containernetworking project. In our simple case, we use the binary
+<a href="https://github.com/containernetworking/cni/tree/master/cnitool" target="_blank">cnitool</a> which
+is a minimal wrapper of the library calls.</p>
+
+<h1 id="demo-run">Demo Run</h1>
+
+<p>In the context of CNI, a container is simply a network namespace.</p>
+
+<pre><code>ip netns add cake
+</code></pre>
+
+<p>A <code>json</code> configuration is required in order the Container Runtime to properly
+call the CNI plugins in they right order and with the right inputs. A such
+configuration looks like that:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">export NETCONFPATH<span style="color:#f92672">=</span>/opt/cni/netconfs
+export CNI_PATH<span style="color:#f92672">=</span>/opt/cni/bin/
+cat &gt; $NETCONFPATH/30-chained.conflist <span style="color:#e6db74">&lt;&lt;EOF
+</span><span style="color:#e6db74">{
+</span><span style="color:#e6db74">  &#34;cniVersion&#34;: &#34;0.3.1&#34;,
+</span><span style="color:#e6db74">  &#34;name&#34;: &#34;mynet&#34;,
+</span><span style="color:#e6db74">  &#34;plugins&#34;: [
+</span><span style="color:#e6db74">     {
+</span><span style="color:#e6db74">        &#34;type&#34;: &#34;bridge&#34;,
+</span><span style="color:#e6db74">        &#34;isGateway&#34;: true,
+</span><span style="color:#e6db74">        &#34;ipMasq&#34;: true,
+</span><span style="color:#e6db74">        &#34;bridge&#34;: &#34;br0&#34;,
+</span><span style="color:#e6db74">        &#34;ipam&#34;: {
+</span><span style="color:#e6db74">            &#34;type&#34;: &#34;host-local&#34;,
+</span><span style="color:#e6db74">            &#34;subnet&#34;: &#34;10.10.10.0/24&#34;,
+</span><span style="color:#e6db74">            &#34;routes&#34;: [
+</span><span style="color:#e6db74">                { &#34;dst&#34;: &#34;0.0.0.0/0&#34; }
+</span><span style="color:#e6db74">            ],
+</span><span style="color:#e6db74">         &#34;dataDir&#34;: &#34;/run/ipam-out-net&#34;
+</span><span style="color:#e6db74">        },
+</span><span style="color:#e6db74">        &#34;dns&#34;: {
+</span><span style="color:#e6db74">          &#34;nameservers&#34;: [ &#34;8.8.8.8&#34; ]
+</span><span style="color:#e6db74">        }
+</span><span style="color:#e6db74">    },
+</span><span style="color:#e6db74">   {
+</span><span style="color:#e6db74">      &#34;type&#34;: &#34;portmap&#34;,
+</span><span style="color:#e6db74">      &#34;capabilities&#34;: {&#34;portMappings&#34;: true},
+</span><span style="color:#e6db74">      &#34;snat&#34;: false
+</span><span style="color:#e6db74">    }
+</span><span style="color:#e6db74">  ]
+</span><span style="color:#e6db74">}
+</span><span style="color:#e6db74">EOF</span></code></pre></div>
+<p>The interesting part is the <code>&quot;capabilities&quot;: {&quot;portMappings&quot;: true},</code> of the
+<code>portmap</code> plugin. It basically means that the Container Runtime is supposed to provide
+some runtime arguments to the plugin with the name <code>portMappings</code>. The format
+of the runtime arguments is a contract between the Container Runtime and the CNI
+plugin without any restriction from the CNI specification. For example, for the
+<code>portmap</code> plugin it should look like that</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># runtime
+</span><span style="color:#75715e"></span>export CAP_ARGS<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;{
+</span><span style="color:#e6db74">    &#34;portMappings&#34;: [
+</span><span style="color:#e6db74">        {
+</span><span style="color:#e6db74">            &#34;hostPort&#34;:      9090,
+</span><span style="color:#e6db74">            &#34;containerPort&#34;: 80,
+</span><span style="color:#e6db74">            &#34;protocol&#34;:      &#34;tcp&#34;
+</span><span style="color:#e6db74">        }
+</span><span style="color:#e6db74">    ]
+</span><span style="color:#e6db74">}&#39;</span></code></pre></div>
+<p>which matches what the <a href="https://github.com/containernetworking/plugins/blob/8e0f961576ae1e42055c272e30de951c3fd1dbeb/plugins/meta/portmap/main.go#L41-L46" target="_blank">code of the
+plugin</a>
+expects.</p>
+
+<p>Having the static network config and the runtime variables in place, we can
+can execute the following</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cnitool add mynet /var/run/netns/cake</code></pre></div>
+<h1 id="custom-plugin-in-the-chain">Custom Plugin in the Chain</h1>
+
+<p>We will extend the chain with two plugins:</p>
+
+<ul>
+<li>One that adds a custom <code>iptable masq rule</code> in order to differiate the traffic.</li>
+<li>One that is a noop plugin that is being used for debugging.</li>
+</ul>
+
+<p>The source code of the plugin can be found at <a href="https://github.com/karampok/diktyo" target="_blank">github</a></p>
+
+<pre><code>go install github.com/karampok/diktyo/plugins/noop
+go install github.com/karampok/diktyo/plugins/ipmasq
+</code></pre>
+
+<p>The initial configuration should include the above two, which ask specific
+runtime arguments.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cat &gt; $NETCONFPATH/30-chained.conflist <span style="color:#e6db74">&lt;&lt;EOF
+</span><span style="color:#e6db74">{
+</span><span style="color:#e6db74">  &#34;cniVersion&#34;: &#34;0.3.1&#34;,
+</span><span style="color:#e6db74">  &#34;name&#34;: &#34;mynet&#34;,
+</span><span style="color:#e6db74">  &#34;plugins&#34;: [
+</span><span style="color:#e6db74">     {
+</span><span style="color:#e6db74">        &#34;type&#34;: &#34;bridge&#34;,
+</span><span style="color:#e6db74">        &#34;isGateway&#34;: true,
+</span><span style="color:#e6db74">        &#34;ipMasq&#34;: false,
+</span><span style="color:#e6db74">        &#34;bridge&#34;: &#34;br0&#34;,
+</span><span style="color:#e6db74">        &#34;ipam&#34;: {
+</span><span style="color:#e6db74">            &#34;type&#34;: &#34;host-local&#34;,
+</span><span style="color:#e6db74">            &#34;subnet&#34;: &#34;10.10.10.0/24&#34;,
+</span><span style="color:#e6db74">            &#34;routes&#34;: [
+</span><span style="color:#e6db74">                { &#34;dst&#34;: &#34;0.0.0.0/0&#34; }
+</span><span style="color:#e6db74">            ],
+</span><span style="color:#e6db74">         &#34;dataDir&#34;: &#34;/run/ipam-out-net&#34;
+</span><span style="color:#e6db74">        },
+</span><span style="color:#e6db74">        &#34;dns&#34;: {
+</span><span style="color:#e6db74">          &#34;nameservers&#34;: [ &#34;8.8.8.8&#34; ]
+</span><span style="color:#e6db74">        }
+</span><span style="color:#e6db74">    },
+</span><span style="color:#e6db74">    {
+</span><span style="color:#e6db74">      &#34;type&#34;:&#34;ipmasq&#34;,
+</span><span style="color:#e6db74">      &#34;tag&#34;:&#34;CNI-SNAT-X&#34;,
+</span><span style="color:#e6db74">      &#34;capabilities&#34;: {&#34;masqEntries&#34;: true}
+</span><span style="color:#e6db74">    },
+</span><span style="color:#e6db74">    {
+</span><span style="color:#e6db74">      &#34;type&#34;: &#34;portmap&#34;,
+</span><span style="color:#e6db74">      &#34;capabilities&#34;: {&#34;portMappings&#34;: true},
+</span><span style="color:#e6db74">      &#34;snat&#34;: false
+</span><span style="color:#e6db74">      },
+</span><span style="color:#e6db74">    {
+</span><span style="color:#e6db74">      &#34;type&#34;:&#34;noop&#34;,
+</span><span style="color:#e6db74">      &#34;debug&#34;:true,
+</span><span style="color:#e6db74">      &#34;capabilities&#34;: {
+</span><span style="color:#e6db74">           &#34;portMappings&#34;: true,
+</span><span style="color:#e6db74">           &#34;masqEntries&#34;: true
+</span><span style="color:#e6db74">      },
+</span><span style="color:#e6db74">      &#34;debugDir&#34;: &#34;/var/vcap/data/cni-configs/net-debug&#34;
+</span><span style="color:#e6db74">    }
+</span><span style="color:#e6db74">  ]
+</span><span style="color:#e6db74">}
+</span><span style="color:#e6db74">EOF</span></code></pre></div>
+<p>The runtime arguments are being provided as usual through the <code>CAP_ARGS</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">export CAP_ARGS<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;{
+</span><span style="color:#e6db74">    &#34;portMappings&#34;: [
+</span><span style="color:#e6db74">        {
+</span><span style="color:#e6db74">            &#34;hostPort&#34;:      9090,
+</span><span style="color:#e6db74">            &#34;containerPort&#34;: 80,
+</span><span style="color:#e6db74">            &#34;protocol&#34;:      &#34;tcp&#34;
+</span><span style="color:#e6db74">        }
+</span><span style="color:#e6db74">     ],
+</span><span style="color:#e6db74">    &#34;masqEntries&#34;: [
+</span><span style="color:#e6db74">     {
+</span><span style="color:#e6db74">            &#34;external&#34;:      &#34;10.0.2.15:5000-5010&#34;,
+</span><span style="color:#e6db74">            &#34;destination&#34;:   &#34;8.8.8.8/32&#34;,
+</span><span style="color:#e6db74">            &#34;protocol&#34;:      &#34;tcp&#34;,
+</span><span style="color:#e6db74">            &#34;description&#34;:   &#34;mark traffic to google dns server&#34;
+</span><span style="color:#e6db74">     }
+</span><span style="color:#e6db74">    ]
+</span><span style="color:#e6db74">}&#39;</span></code></pre></div>
+<p>Again we call the <code>cnitool</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cnitool add mynet /var/run/netns/cake</code></pre></div>
+<p>As a result the container will have a custom <code>iptable</code> rule that SNATs the traffic
+originating from the container to the right source port range.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">Chain POSTROUTING <span style="color:#f92672">(</span>policy ACCEPT <span style="color:#ae81ff">0</span> packets, <span style="color:#ae81ff">0</span> bytes<span style="color:#f92672">)</span>
+ pkts bytes target     prot opt in     out     source               destination
+    <span style="color:#ae81ff">0</span>     <span style="color:#ae81ff">0</span> CNI-SNAT-X  all  --  *      *       <span style="color:#ae81ff">0</span>.0.0.0/0            <span style="color:#ae81ff">0</span>.0.0.0/0            /* ipmasq cni plugin */
+Chain CNI-SNAT-X <span style="color:#f92672">(</span><span style="color:#ae81ff">1</span> references<span style="color:#f92672">)</span>
+ pkts bytes target     prot opt in     out     source               destination
+    <span style="color:#ae81ff">0</span>     <span style="color:#ae81ff">0</span> SNAT       tcp  --  *      *       <span style="color:#ae81ff">10</span>.10.10.3           <span style="color:#ae81ff">8</span>.8.8.8              /* cnitool-a992a834112856df626c:_mark_traffic_to_google_dns_server */ to:10.0.2.15:5000-5010</code></pre></div>
+<p>The <code>noop</code> plugin writes all the <code>stdins</code> and previous results in
+a file for debugging or auditing reasons.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cat /var/vcap/data/cni-configs/net-c/eth0/add_1519769962.json | jq .c
+<span style="color:#f92672">{</span>
+  <span style="color:#e6db74">&#34;capabilities&#34;</span>: <span style="color:#f92672">{</span>
+    <span style="color:#e6db74">&#34;masqEntries&#34;</span>: true,
+    <span style="color:#e6db74">&#34;metadata&#34;</span>: true,
+    <span style="color:#e6db74">&#34;portMappings&#34;</span>: true
+  <span style="color:#f92672">}</span>,
+  <span style="color:#e6db74">&#34;cniVersion&#34;</span>: <span style="color:#e6db74">&#34;0.3.1&#34;</span>,
+  <span style="color:#e6db74">&#34;debug&#34;</span>: true,
+  <span style="color:#e6db74">&#34;debugDir&#34;</span>: <span style="color:#e6db74">&#34;/var/vcap/data/cni-configs/net-debug&#34;</span>,
+  <span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;mynet&#34;</span>,
+  <span style="color:#e6db74">&#34;prevResult&#34;</span>: <span style="color:#f92672">{</span>
+    <span style="color:#e6db74">&#34;cniVersion&#34;</span>: <span style="color:#e6db74">&#34;0.3.1&#34;</span>,
+    <span style="color:#e6db74">&#34;dns&#34;</span>: <span style="color:#f92672">{</span>
+      <span style="color:#e6db74">&#34;nameservers&#34;</span>: <span style="color:#f92672">[</span>
+        <span style="color:#e6db74">&#34;8.8.8.8&#34;</span>
+      <span style="color:#f92672">]</span>
+    <span style="color:#f92672">}</span>,
+    <span style="color:#e6db74">&#34;interfaces&#34;</span>: <span style="color:#f92672">[</span>
+      <span style="color:#f92672">{</span>
+        <span style="color:#e6db74">&#34;mac&#34;</span>: <span style="color:#e6db74">&#34;7e:d0:b5:97:9e:63&#34;</span>,
+        <span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;br0&#34;</span>
+      <span style="color:#f92672">}</span>,
+      <span style="color:#f92672">{</span>
+        <span style="color:#e6db74">&#34;mac&#34;</span>: <span style="color:#e6db74">&#34;7e:d0:b5:97:9e:63&#34;</span>,
+        <span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;veth8fa1b01d&#34;</span>
+      <span style="color:#f92672">}</span>,
+      <span style="color:#f92672">{</span>
+        <span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;eth0&#34;</span>,
+        <span style="color:#e6db74">&#34;sandbox&#34;</span>: <span style="color:#e6db74">&#34;/var/run/netns/cake&#34;</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">]</span>,
+    <span style="color:#e6db74">&#34;ips&#34;</span>: <span style="color:#f92672">[</span>
+      <span style="color:#f92672">{</span>
+        <span style="color:#e6db74">&#34;address&#34;</span>: <span style="color:#e6db74">&#34;10.10.10.2/24&#34;</span>,
+        <span style="color:#e6db74">&#34;gateway&#34;</span>: <span style="color:#e6db74">&#34;10.10.10.1&#34;</span>,
+        <span style="color:#e6db74">&#34;interface&#34;</span>: <span style="color:#ae81ff">2</span>,
+        <span style="color:#e6db74">&#34;version&#34;</span>: <span style="color:#e6db74">&#34;4&#34;</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">]</span>,
+    <span style="color:#e6db74">&#34;routes&#34;</span>: <span style="color:#f92672">[</span>
+      <span style="color:#f92672">{</span>
+        <span style="color:#e6db74">&#34;dst&#34;</span>: <span style="color:#e6db74">&#34;0.0.0.0/0&#34;</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">]</span>
+  <span style="color:#f92672">}</span>,
+  <span style="color:#e6db74">&#34;runtimeConfig&#34;</span>: <span style="color:#f92672">{</span>
+    <span style="color:#e6db74">&#34;masqEntries&#34;</span>: <span style="color:#f92672">[</span>
+      <span style="color:#f92672">{</span>
+        <span style="color:#e6db74">&#34;description&#34;</span>: <span style="color:#e6db74">&#34;allow production traffic&#34;</span>,
+        <span style="color:#e6db74">&#34;destination&#34;</span>: <span style="color:#e6db74">&#34;8.8.8.8/32&#34;</span>,
+        <span style="color:#e6db74">&#34;external&#34;</span>: <span style="color:#e6db74">&#34;10.0.2.15:5000-5010&#34;</span>,
+        <span style="color:#e6db74">&#34;protocol&#34;</span>: <span style="color:#e6db74">&#34;tcp&#34;</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">]</span>,
+    <span style="color:#e6db74">&#34;portMappings&#34;</span>: <span style="color:#f92672">[</span>
+      <span style="color:#f92672">{</span>
+        <span style="color:#e6db74">&#34;containerPort&#34;</span>: <span style="color:#ae81ff">80</span>,
+        <span style="color:#e6db74">&#34;hostPort&#34;</span>: <span style="color:#ae81ff">9090</span>,
+        <span style="color:#e6db74">&#34;protocol&#34;</span>: <span style="color:#e6db74">&#34;tcp&#34;</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">]</span>
+  <span style="color:#f92672">}</span>,
+  <span style="color:#e6db74">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;noop&#34;</span>
+<span style="color:#f92672">}</span></code></pre></div>
+<h1 id="conclusion">Conclusion</h1>
+
+<p>The tricky part with the custom plugin is that the Container Runtime should add
+to add custom runtime arguments. A such behavior might not be supported out of
+the box.</p>
+
+<p>CNI plugins in chaining mode seems a good fit to add custom behavior on the
+network stack. Important is not to &ldquo;abuse&rdquo; but try to solve only network
+related topic. CNI chaining combines different CNI plugins and places the
+right &ldquo;responsibility&rdquo; to the different CNI plugins enabling to build complex
+and efficient network behavior stacks.</p>
+
+</div>
+
+    
+<footer class='entry-footer-container'>
+  <div class='entry-footer'>
+  <div class='tags'>
+  <span class='taxonomyTerm-icon'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M20.59,13.41l-7.17,7.17a2,2,0,0,1-2.83,0L2,12V2H12l8.59,8.59A2,2,0,0,1,20.59,13.41Z"/>
+  <line x1="7" y1="7" x2="7" y2="7"/>
+  
+</svg>
+</span>
+  <span class='screen-reader'>Tags: </span><a class='tag' href='/tags/container-networking'>Container-networking</a>, <a class='tag' href='/tags/cni'>CNI</a>, <a class='tag' href='/tags/kubernetes'>Kubernetes</a>, <a class='tag' href='/tags/linux'>Linux</a></div>
+
+  </div>
+</footer>
+
+
+  </article>
+  
+<nav class='entry-nav-container'>
+  <div class='entry-nav'><div class='prev-entry'>
+      <a href='/posts/container-networking-with-cni/'>
+        <span aria-hidden='true'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <line x1="20" y1="12" x2="4" y2="12"/>
+  <polyline points="10 18 4 12 10 6"/>
+  
+</svg>
+ Previous</span>
+        <span class='screen-reader'>Previous post: </span>How a Container Runtime is using CNI</a>
+    </div></div>
+</nav>
+
+  
+</main>
+
+    <footer id='footer' class='footer-container'>
+      <div class='footer'>
+        <div class='social-menu-container'>
+  <nav aria-label='Social Menu'>
+    <ul class='social-menu'><li>
+        <a href='https://github.com/karampok' target='_blank' rel='noopener'>
+          <span class='screen-reader'>Open Github account in new tab</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+  
+</svg>
+</a>
+      </li><li>
+        <a href='https://twitter.com/karampok' target='_blank' rel='noopener'>
+          <span class='screen-reader'>Open Twitter account in new tab</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
+  
+</svg>
+</a>
+      </li><li>
+        <a href='mailto:karampok&#43;site@gmail.com' target='_blank' rel='noopener'>
+          <span class='screen-reader'>Contact via Email</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+  <polyline points="22,6 12,13 2,6"/>
+  
+</svg>
+</a>
+      </li><li>
+        <a href='https://linkedin.com/in/kkarampogias' target='_blank' rel='noopener'>
+          <span class='screen-reader'>Open Linkedin account in new tab</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path stroke-width="1.8" d="m5.839218,4.101561c0,1.211972 -0.974141,2.194011 -2.176459,2.194011s-2.176459,-0.982039 -2.176459,-2.194011c0,-1.211094 0.974141,-2.194011 2.176459,-2.194011s2.176459,0.982917 2.176459,2.194011zm0.017552,3.94922l-4.388022,0l0,14.04167l4.388022,0l0,-14.04167zm7.005038,0l-4.359939,0l0,14.04167l4.360816,0l0,-7.370999c0,-4.098413 5.291077,-4.433657 5.291077,0l0,7.370999l4.377491,0l0,-8.89101c0,-6.915523 -7.829986,-6.66365 -9.669445,-3.259423l0,-1.891237z"/>
+  
+</svg>
+</a>
+      </li></ul>
+  </nav>
+</div>
+        <div class='copyright'>
+  <p>
+
+       &copy; 2018 karampok 
+  </p>
+</div>
+
+      </div>
+    </footer>
+
+  </div><script src='/assets/js/main.5871befd.js'></script><script src='/js/custom.js'></script></body>
+
+</html>
+

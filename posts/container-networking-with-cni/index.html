@@ -1,103 +1,124 @@
 <!DOCTYPE html>
-<html lang='en'>
-
-<head>
+<html lang='en' dir='auto'><head>
   <meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'>
 <meta name='description' content='The last couple of years I have been working with containers in low level. I learned how they work under the hood and I got familiar with container standards like OCI (Open Container Initiative) and CNI (Container Network Interface). When it comes to the runtime spec, there are quite many resources which explain in detail the runtime standard. On the other hand, there are not many resources about CNI, and it has not been clear to me how the runtime engine is using the CNI standard, as well as how difficult is to write a network CNI compatible plugin.'>
+<meta name='theme-color' content='#000000'>
 
 <meta property='og:title' content='How a Container Runtime is using CNI • Konstantinos Karampogias'>
 <meta property='og:description' content='The last couple of years I have been working with containers in low level. I learned how they work under the hood and I got familiar with container standards like OCI (Open Container Initiative) and CNI (Container Network Interface). When it comes to the runtime spec, there are quite many resources which explain in detail the runtime standard. On the other hand, there are not many resources about CNI, and it has not been clear to me how the runtime engine is using the CNI standard, as well as how difficult is to write a network CNI compatible plugin.'>
 <meta property='og:url' content='http://www.karampok.me/posts/container-networking-with-cni/'>
 <meta property='og:site_name' content='Konstantinos Karampogias'>
-<meta property='og:type' content='article'><meta property='og:image' content='https://www.gravatar.com/avatar/265e87c7ecf5a798c566e9f7549fd8c6?s=256'><meta property='article:section' content='Posts'><meta property='article:tag' content='container-networking'><meta property='article:tag' content='CNI'><meta property='article:tag' content='kubernetes'><meta property='article:tag' content='Linux'><meta property='article:published_time' content='2018-01-20T12:00:00&#43;06:00'/><meta property='article:modified_time' content='2018-01-20T12:00:00&#43;06:00'/><meta name='twitter:card' content='summary'><meta name='twitter:site' content='@twitter'><meta name='twitter:creator' content='@karampok'>
+<meta property='og:type' content='article'><meta property='og:image' content='https://www.gravatar.com/avatar/265e87c7ecf5a798c566e9f7549fd8c6?s=256'><meta property='article:section' content='posts'><meta property='article:tag' content='container-networking'><meta property='article:tag' content='CNI'><meta property='article:tag' content='kubernetes'><meta property='article:tag' content='Linux'><meta property='article:published_time' content='2018-01-20T12:00:00&#43;06:00'/><meta property='article:modified_time' content='2018-01-20T12:00:00&#43;06:00'/><meta name='twitter:card' content='summary'><meta name='twitter:creator' content='@karampok'>
 
-<meta name="generator" content="Hugo 0.36.1" />
+<meta name="generator" content="Hugo 0.85.0" />
 
   <title>How a Container Runtime is using CNI • Konstantinos Karampogias</title>
   <link rel='canonical' href='http://www.karampok.me/posts/container-networking-with-cni/'>
   
   
   <link rel='icon' href='/favicon.ico'>
-<link rel='stylesheet' href='/assets/css/main.f0e8df71.css'><link rel='stylesheet' href='/css/custom.css'>
-<script>
-window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
-ga('create', 'UA-112175593-1', 'auto');
-ga('send', 'pageview');
+<link rel='stylesheet' href='/assets/css/main.ab98e12b.css'><link rel='stylesheet' href='/css/custom.css'><style>
+:root{--color-accent:#000000;}
+</style>
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-112175593-1', 'auto');
+	
+	ga('send', 'pageview');
+}
 </script>
-<script async src='//www.google-analytics.com/analytics.js'></script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+  
 
 </head>
-
-
 <body class='page type-posts'>
-  <div class='site'>
 
-    <a class='screen-reader' href='#main'>Skip to Content</a>
-
-    <header id='header' class='header-container'>
-      <div class='header site-header'>
-        <nav id='main-menu' class='main-menu-container' aria-label='Main Menu'>
-  <ul class='main-menu'>
-  <li>
-      <a href='/'>home</a>
-    </li>
-  <li>
-      <a href='/posts/'>Posts</a>
-    </li>
-  <li>
-      <a href='/about/'>About</a>
-    </li>
-  
-  </ul>
-</nav>
-
-        <div class='header-info'>
-          
-          <p class='site-title title'>Konstantinos Karampogias</p>
-          
-          <p class='site-description subtitle'>software engineer</p>
-        </div>
+  <div class='site'><a class='screen-reader-text' href='#content'>Skip to Content</a><div class='main'><nav id='main-menu' class='menu main-menu' aria-label='Main Menu'>
+  <div class='container'>
+    
+    <ul><li class='item'>
+        <a href='/'>home</a>
+      </li><li class='item'>
+        <a href='/posts/'>posts</a>
+      </li><li class='item'>
+        <a href='/about/'>about</a>
+      </li></ul>
+  </div>
+</nav><div class='header-widgets'>
+        <div class='container'>
+    
+    <style>.widget-breadcrumbs li:after{content:'\2f '}</style>
+  <section class='widget widget-breadcrumbs sep-after'>
+    <nav id='breadcrumbs'>
+      <ol><li><a href='/'>home</a></li><li><a href='/posts/'>posts</a></li><li><span>How a Container Runtime is using CNI</span></li></ol>
+    </nav>
+  </section></div>
       </div>
-    </header>
+
+      <header id='header' class='header site-header'>
+        <div class='container sep-after'>
+          <div class='header-info'><p class='site-title title'>Konstantinos Karampogias</p><p class='desc site-desc'>software engineer</p>
+          </div>
+        </div>
+      </header>
+
+      <main id='content'>
 
 
-<main id='main' class='main'>
-  <article lang='en' class='entry'>
-    <header class='header-container'>
-  <div class='header entry-header'>
+<article lang='en' class='entry'>
+  <header class='header entry-header'>
+  <div class='container sep-after'>
     <div class='header-info'>
       <h1 class='title'>How a Container Runtime is using CNI</h1>
       
 
     </div>
-    
-<div class='meta'>
-  <span class='posted-on'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
-  
-  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-  <line x1="16" y1="2" x2="16" y2="6"/>
-  <line x1="8" y1="2" x2="8" y2="6"/>
-  <line x1="3" y1="10" x2="21" y2="10"/>
-  
+    <div class='entry-meta'>
+  <span class='posted-on'><svg
+  class="icon"
+  xmlns="http://www.w3.org/2000/svg"
+  viewbox="0 0 24 24"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  stroke-width="2"
+  aria-hidden="true"
+><rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+<line x1="16" y1="2" x2="16" y2="6" />
+<line x1="8" y1="2" x2="8" y2="6" />
+<line x1="3" y1="10" x2="21" y2="10" />
 </svg>
-<span class='screen-reader'>Posted on </span>
-  <time class='date' datetime='2018-01-20T12:00:00&#43;06:00'>2018, Jan 20</time>
+<span class='screen-reader-text'>Posted on </span>
+  <time class='entry-date' datetime='2018-01-20T12:00:00&#43;06:00'>2018, Jan 20</time>
 </span>
 
-  <span class='byline'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
-  
-  <path d="M21,21V20c0-2.76-4-5-9-5s-9,2.24-9,5v1"/>
-  <path d="M16,6.37A4,4,0,1,1,12.63,3,4,4,0,0,1,16,6.37Z"/>
-  
+  <span class='byline'><svg
+  class="icon"
+  xmlns="http://www.w3.org/2000/svg"
+  viewbox="0 0 24 24"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  stroke-width="2"
+  aria-hidden="true"
+><path d="M21,21V20c0-2.76-4-5-9-5s-9,2.24-9,5v1" />
+<path d="M16,6.37A4,4,0,1,1,12.63,3,4,4,0,0,1,16,6.37Z" />
 </svg>
-<span class='screen-reader'> by </span><a href='/authors/karampok'>Konstantinos Karampogias</a></span>
+<span class='screen-reader-text'> by </span><a href='/authors/karampok'>Konstantinos Karampogias</a></span>
   
-<span class='reading-time'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
-  
-  <circle cx="12" cy="12" r="10"/>
-  <polyline points="12 6 12 12 15 15"/>
-  
+<span class='reading-time'><svg
+  class="icon"
+  xmlns="http://www.w3.org/2000/svg"
+  viewbox="0 0 24 24"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  stroke-width="2"
+  aria-hidden="true"
+><circle cx="12" cy="12" r="10" />
+<polyline points="12 6 12 12 15 15" />
 </svg>
 8 mins read
 </span>
@@ -109,13 +130,11 @@ ga('send', 'pageview');
   </div>
 </header>
 
-    
-    
-
-    <div class='entry-content'>
+  
   
 
-<p>The last couple of years I have been working with containers in low level. I
+  <div class='container entry-content'>
+  <p>The last couple of years I have been working with containers in low level. I
 learned how they work under the hood and I got familiar with container
 standards like OCI (Open Container Initiative) and CNI (Container Network
 Interface). When it comes to the runtime spec, there are quite many resources
@@ -123,32 +142,24 @@ which explain in detail the runtime standard. On the other hand, there are not
 many resources about CNI, and it has not been clear to me how the runtime
 engine is using the CNI standard, as well as how difficult is to
 write a network CNI compatible plugin.</p>
-
 <h2 id="introduction-to-cni">Introduction to CNI</h2>
-
 <p>CNI stands for Container Networking Interface, and it targets to standardize
 the interface between the container runtime engine and the network
 implementation. It is a minimal standard way to connect a container to a
 network.</p>
-
-<p>There are three things that <a href="https://github.com/containernetworking" target="_blank">CNI</a> project offers</p>
-
+<p>There are three things that <a href="https://github.com/containernetworking">CNI</a> project offers</p>
 <ol>
-<li>The <a href="https://github.com/containernetworking/cni/blob/master/SPEC.md" target="_blank">CNI Specification</a></li>
-<li>A <a href="https://goo.gl/FY2pXW" target="_blank">golang library</a>  which provides an implementation of the CNI specification</li>
-<li><a href="https://github.com/containernetworking/plugins" target="_blank">Plugins</a> : reference implementation for a variety of use-cases</li>
+<li>The <a href="https://github.com/containernetworking/cni/blob/master/SPEC.md">CNI Specification</a></li>
+<li>A <a href="https://goo.gl/FY2pXW">golang library</a>  which provides an implementation of the CNI specification</li>
+<li><a href="https://github.com/containernetworking/plugins">Plugins</a> : reference implementation for a variety of use-cases</li>
 </ol>
-
 <p>How it works can be summarized in the following image</p>
-
-<p><img src="/cni/cni-how-is-working-1.png" alt="How CNI is being called " /></p>
-
+<p><img src="/cni/cni-how-is-working-1.png" alt="How CNI is being called "></p>
 <p>When discussing about CNI, there are some information that I find nice to keep
 in mind:</p>
-
 <ul>
 <li>A plugin that implements the CNI standard is binary, not a daemon. It should always have
-at least <a href="http://man7.org/linux/man-pages/man7/capabilities.7.html" target="_blank">CAP_NET_ADMIN</a>
+at least <a href="http://man7.org/linux/man-pages/man7/capabilities.7.html">CAP_NET_ADMIN</a>
 capability when runs.</li>
 <li>Network definitions or network configuration are stored as json files. These
 json files are streamed to the plugin through <code>stdin</code>.</li>
@@ -156,93 +167,78 @@ json files are streamed to the plugin through <code>stdin</code>.</li>
 to be created (runtime variable) should be passed to the plugin via
 environmental variables. Nevertheless, in the latest CNI it is also possible
 to send certain runtime config via <code>json</code> on <code>stdin</code>, especially for some
-extension &amp; optional features. More info <a href="https://github.com/containernetworking/cni/blob/master/CONVENTIONS.md" target="_blank">here</a>.</li>
+extension &amp; optional features. More info <a href="https://github.com/containernetworking/cni/blob/master/CONVENTIONS.md">here</a>.</li>
 <li>The binary does not suppose to have any other input configuration outside the
 above two.</li>
 <li>The CNI plugin is responsible for wiring up the container, and is expected to
 hide the network complexity.</li>
-<li>For a CNI plugin a container is the same thing as <a href="https://goo.gl/fBCAjB" target="_blank">Linux network namespace</a>.</li>
+<li>For a CNI plugin a container is the same thing as <a href="https://goo.gl/fBCAjB">Linux network namespace</a>.</li>
 </ul>
-
 <p>its an advanced use case, but its also an interesting point because it means that the runtime essentially modifies the config JSON after the operators provides it, but before the plugin sees it.</p>
-
 <h2 id="container-runtime">Container Runtime</h2>
-
 <p>In a OCI/CNI compatible version, the Container Runtime [Engine] is a daemon
 process that sits between the container scheduler and the actual implementation
 of the binaries that create a container. This daemon does not necessarily need
-to run <a href="https://www.cloudfoundry.org/blog/route-rootless-containers/" target="_blank">as
+to run <a href="https://www.cloudfoundry.org/blog/route-rootless-containers/">as
 root user</a>.
 It listens for requests from the scheduler.  It does not touch the kernel, as
 it uses external binaries through the container standards to actually create or
 delete a container.</p>
-
-<p>For example  in kubernetes case, the Container Runtime can be <a href="https://github.com/kubernetes-incubator/cri-o" target="_blank">cri-o</a>,
+<p>For example  in kubernetes case, the Container Runtime can be <a href="https://github.com/kubernetes-incubator/cri-o">cri-o</a>,
 (or cri-containerd), it listens for requests from the kubelet, the agent from
 the scheduler located in each node through the
-<a href="http://blog.kubernetes.io/2016/12/container-runtime-interface-cri-in-kubernetes.html" target="_blank">CRI</a>
+<a href="http://blog.kubernetes.io/2016/12/container-runtime-interface-cri-in-kubernetes.html">CRI</a>
 interface.  Kubelet is instructing the Container Runtime to spin up a
-container, and the runtime is executing by calling in a standard way the <a href="https://github.com/opencontainers/runc" target="_blank">runc</a>
+container, and the runtime is executing by calling in a standard way the <a href="https://github.com/opencontainers/runc">runc</a>
 (binary that implements the OCI-runtime specs) and
-<a href="https://github.com/coreos/flannel" target="_blank">flannel</a> (binary that implements the CNI
+<a href="https://github.com/coreos/flannel">flannel</a> (binary that implements the CNI
 CNI). The above process is summarized in the following image.</p>
-
-<p><img src="/cni/k8s-arch.png" alt="k8s-arch" /></p>
-
+<p><img src="/cni/k8s-arch.png" alt="k8s-arch"></p>
 <p>Container Runtime needs to do the following in order to create a container:</p>
-
 <ol>
 <li>Creates the <code>rootfs</code> filesystem.</li>
 <li>Creates the container (set of process that run isolated in namespaces and limited by cgroups).</li>
 <li>Connects the container to a network.</li>
 <li>Starts the user process (entrypoint).</li>
 </ol>
-
-<p><img src="/cni/containerRuntime2.png" alt="ContainerRuntime" /></p>
-
+<p><img src="/cni/containerRuntime2.png" alt="ContainerRuntime"></p>
 <p>As far as the network part is concerned, important is that the Container
 Runtime asks from the OCI-Runtime binary to place the container process into
 a new network namespace (<code>net ns X</code>). The Container Runtime in the next step
 will call the CNI plugin using the new namespace as runtime <code>ENV</code> variable.
 The CNI plugin should have all the info in order to do the network magic.</p>
-
 <h2 id="how-container-rutime-uses-cni">How Container Rutime Uses CNI</h2>
-
 <p>We will give an example how a runtime uses CNI to connect a container to a bridge
-using the <a href="https://github.com/containernetworking/plugins/tree/master/plugins/main/bridge" target="_blank">bridge
+using the <a href="https://github.com/containernetworking/plugins/tree/master/plugins/main/bridge">bridge
 plugin</a>.
 We will &ldquo;emulate&rdquo; the actions of the runtime using simple bash commands.</p>
-
 <h3 id="provision-phase">Provision Phase</h3>
-
 <p>Before a runtime can spin up a container it needs some server provisioning.
 Which tool is being used (e.g bosh, ansible, manual scripts) is irrelevant. It
 only needs to make sure that the required binaries are in place. In our simple
 case we need the OCI-runtime binary (<code>runc</code>) and the CNI plugins binaries
 (<code>bridge</code>, <code>host-local</code>).</p>
-
 <p>We can either download the pre-built binaries from the repos or we can build
 the binaries from source</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># as user
-</span><span style="color:#75715e"></span>go get github.com/opencontainers/runc
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># as user</span>
+go get github.com/opencontainers/runc
 go get github.com/containernetworking/plugins
 cd $GOPATH/src/github.com/containernetworking/plugins
 ./build.sh
 sudo mkdir -p /opt/cni/<span style="color:#f92672">{</span>bin,netconfs<span style="color:#f92672">}</span>
 sudo cp bin/* /opt/cni/bin/
-which /opt/cni/bin/<span style="color:#f92672">{</span>bridge,host-local<span style="color:#f92672">}</span> runc</code></pre></div>
-<p>During the provision step, we create the bridge to where containers will be connected.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># as root
-</span><span style="color:#75715e"></span>ip link add name br0 type bridge
-ip addr add <span style="color:#ae81ff">10</span>.10.10.1/24 dev br0
-ip link set dev br0 up</code></pre></div>
-<p>This step might not be required because the <code>bridge</code> plugin can create the
+which /opt/cni/bin/<span style="color:#f92672">{</span>bridge,host-local<span style="color:#f92672">}</span> runc
+</code></pre></div><p>During the provision step, we create the bridge to where containers will be connected.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># as root</span>
+ip link add name br0 type bridge
+ip addr add 10.10.10.1/24 dev br0
+ip link set dev br0 up
+</code></pre></div><p>This step might not be required because the <code>bridge</code> plugin can create the
 bridge, but in principle setting up the network medium is not a task from
 the CNI plugin.</p>
-
 <p>Finally, we should add the network configuration somewhere on the filesystem.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># as root
-</span><span style="color:#75715e"></span>export NETCONFPATH<span style="color:#f92672">=</span>/opt/cni/netconfs
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># as root</span>
+export NETCONFPATH<span style="color:#f92672">=</span>/opt/cni/netconfs
 cat &gt; $NETCONFPATH/10-mynet.conf <span style="color:#e6db74">&lt;&lt;EOF
 </span><span style="color:#e6db74">{
 </span><span style="color:#e6db74">    &#34;cniVersion&#34;: &#34;0.2.0&#34;,
@@ -263,135 +259,130 @@ cat &gt; $NETCONFPATH/10-mynet.conf <span style="color:#e6db74">&lt;&lt;EOF
 </span><span style="color:#e6db74">      &#34;nameservers&#34;: [ &#34;8.8.8.8&#34; ]
 </span><span style="color:#e6db74">    }
 </span><span style="color:#e6db74">}
-</span><span style="color:#e6db74">EOF</span></code></pre></div>
-<h3 id="runtime-phase">Runtime Phase</h3>
-
+</span><span style="color:#e6db74">EOF</span>
+</code></pre></div><h3 id="runtime-phase">Runtime Phase</h3>
 <p>The container orchestrator will eventually instruct the container runtime to
 spin up a container.</p>
-
 <p>Runtime will do the following simplified steps [as shown in the figure above]</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Step 1: creates the rootfs directory
-</span><span style="color:#75715e"></span>mkdir bundle <span style="color:#f92672">&amp;&amp;</span> cd bundle/
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Step 1: creates the rootfs directory</span>
+mkdir bundle <span style="color:#f92672">&amp;&amp;</span> cd bundle/
 mkdir -p rootfs <span style="color:#f92672">&amp;&amp;</span> docker export <span style="color:#66d9ef">$(</span>docker create busybox<span style="color:#66d9ef">)</span> | tar -C rootfs -xvf -
 
-<span style="color:#75715e"># Step 2:
-</span><span style="color:#75715e"># a. creates the OCI runtime config
-</span><span style="color:#75715e"></span>runc spec --rootless
-<span style="color:#75715e"># b. modifies the OCI runtime config accordingly 
-</span><span style="color:#75715e"># asks for a new network namespace, other changes e.g. tty
-</span><span style="color:#75715e"># cat config.json |grep -A20 namespace
-</span><span style="color:#75715e">#   &#34;namespaces&#34;: [
-</span><span style="color:#75715e">#           {
-</span><span style="color:#75715e">#                   &#34;type&#34;: &#34;pid&#34;
-</span><span style="color:#75715e">#           },
-</span><span style="color:#75715e">#           {
-</span><span style="color:#75715e">#                   &#34;type&#34;: &#34;ipc&#34;
-</span><span style="color:#75715e">#           },
-</span><span style="color:#75715e">#           {
-</span><span style="color:#75715e">#                   &#34;type&#34;: &#34;uts&#34;
-</span><span style="color:#75715e">#           },
-</span><span style="color:#75715e">#           {
-</span><span style="color:#75715e">#                   &#34;type&#34;: &#34;mount&#34;
-</span><span style="color:#75715e">#           },
-</span><span style="color:#75715e">#           {
-</span><span style="color:#75715e">#                   &#34;type&#34;: &#34;user&#34;
-</span><span style="color:#75715e">#           },
-</span><span style="color:#75715e">#           {
-</span><span style="color:#75715e">#                   &#34;type&#34;: &#34;network&#34; &lt;--adds network namespace
-</span><span style="color:#75715e">#           }
-</span><span style="color:#75715e">#   ],
-</span><span style="color:#75715e">#   &#34;maskedPaths&#34;: [
-</span><span style="color:#75715e">#
-</span><span style="color:#75715e"></span>
-<span style="color:#75715e"># c. creates the container  
-</span><span style="color:#75715e"></span>runc create cake
+<span style="color:#75715e"># Step 2:</span>
+<span style="color:#75715e"># a. creates the OCI runtime config</span>
+runc spec --rootless
+<span style="color:#75715e"># b. modifies the OCI runtime config accordingly </span>
+<span style="color:#75715e"># asks for a new network namespace, other changes e.g. tty</span>
+<span style="color:#75715e"># cat config.json |grep -A20 namespace</span>
+<span style="color:#75715e">#   &#34;namespaces&#34;: [</span>
+<span style="color:#75715e">#           {</span>
+<span style="color:#75715e">#                   &#34;type&#34;: &#34;pid&#34;</span>
+<span style="color:#75715e">#           },</span>
+<span style="color:#75715e">#           {</span>
+<span style="color:#75715e">#                   &#34;type&#34;: &#34;ipc&#34;</span>
+<span style="color:#75715e">#           },</span>
+<span style="color:#75715e">#           {</span>
+<span style="color:#75715e">#                   &#34;type&#34;: &#34;uts&#34;</span>
+<span style="color:#75715e">#           },</span>
+<span style="color:#75715e">#           {</span>
+<span style="color:#75715e">#                   &#34;type&#34;: &#34;mount&#34;</span>
+<span style="color:#75715e">#           },</span>
+<span style="color:#75715e">#           {</span>
+<span style="color:#75715e">#                   &#34;type&#34;: &#34;user&#34;</span>
+<span style="color:#75715e">#           },</span>
+<span style="color:#75715e">#           {</span>
+<span style="color:#75715e">#                   &#34;type&#34;: &#34;network&#34; &lt;--adds network namespace</span>
+<span style="color:#75715e">#           }</span>
+<span style="color:#75715e">#   ],</span>
+<span style="color:#75715e">#   &#34;maskedPaths&#34;: [</span>
+<span style="color:#75715e">#</span>
 
-<span style="color:#75715e"># $ runc list
-</span><span style="color:#75715e"># ID          PID         STATUS      BUNDLE                 CREATED                          OWNER
-</span><span style="color:#75715e"># cake        13076       created     /home/vagrant/bundle   2018-01-22T13:09:40.326479248Z   vagrant
-</span><span style="color:#75715e"></span>
-runc exec -t -c <span style="color:#e6db74">&#34;CAP_NET_RAW&#34;</span> cake sh  # To enter the container</code></pre></div>
-<p>The Container Runtime needs to get back the newly created network namespace.
+<span style="color:#75715e"># c. creates the container  </span>
+runc create cake
+
+<span style="color:#75715e"># $ runc list</span>
+<span style="color:#75715e"># ID          PID         STATUS      BUNDLE                 CREATED                          OWNER</span>
+<span style="color:#75715e"># cake        13076       created     /home/vagrant/bundle   2018-01-22T13:09:40.326479248Z   vagrant</span>
+
+runc exec -t -c <span style="color:#e6db74">&#34;CAP_NET_RAW&#34;</span> cake sh  <span style="color:#75715e"># To enter the container</span>
+</code></pre></div><p>The Container Runtime needs to get back the newly created network namespace.
 In the <code>runc</code> case, this can be done through the <code>state.json</code> file.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># as root
-</span><span style="color:#75715e"></span>ns<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>cat /var/run/user/1000/runc/cake/state.json | jq <span style="color:#e6db74">&#39;.namespace_paths.NEWNET&#39;</span> -r<span style="color:#66d9ef">)</span>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># as root</span>
+ns<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>cat /var/run/user/1000/runc/cake/state.json | jq <span style="color:#e6db74">&#39;.namespace_paths.NEWNET&#39;</span> -r<span style="color:#66d9ef">)</span>
 mkdir -p /var/run/netns
 ln -sf $ns /var/run/netns/cake
 ip netns
 
-<span style="color:#75715e"># cat /var/run/user/1000/runc/cake/state.json | jq &#39;.namespace_paths&#39;
-</span><span style="color:#75715e"># {
-</span><span style="color:#75715e">#   &#34;NEWIPC&#34;: &#34;/proc/13076/ns/ipc&#34;,
-</span><span style="color:#75715e">#   &#34;NEWNET&#34;: &#34;/proc/13076/ns/net&#34;,
-</span><span style="color:#75715e">#   &#34;NEWNS&#34;: &#34;/proc/13076/ns/mnt&#34;,
-</span><span style="color:#75715e">#   &#34;NEWPID&#34;: &#34;/proc/13076/ns/pid&#34;,
-</span><span style="color:#75715e">#   &#34;NEWUSER&#34;: &#34;/proc/13076/ns/user&#34;,
-</span><span style="color:#75715e">#   &#34;NEWUTS&#34;: &#34;/proc/13076/ns/uts&#34;
-</span><span style="color:#75715e"># }
-</span><span style="color:#75715e"># $ ps -aux |grep 13076
-</span><span style="color:#75715e"># vagrant  13076  0.0  0.3  58016  6848 ?        Ssl  13:09   0:00 runc init
-</span><span style="color:#75715e"># # the `runc init` is the process that starts when `runc create` command is
-</span><span style="color:#75715e"># # executed  and which keeps the namespaces alive
-</span><span style="color:#75715e"></span>#</code></pre></div>
-<p>It will then set bash enviroment variables (<code>CNI_*</code>) which contain runtime
+<span style="color:#75715e"># cat /var/run/user/1000/runc/cake/state.json | jq &#39;.namespace_paths&#39;</span>
+<span style="color:#75715e"># {</span>
+<span style="color:#75715e">#   &#34;NEWIPC&#34;: &#34;/proc/13076/ns/ipc&#34;,</span>
+<span style="color:#75715e">#   &#34;NEWNET&#34;: &#34;/proc/13076/ns/net&#34;,</span>
+<span style="color:#75715e">#   &#34;NEWNS&#34;: &#34;/proc/13076/ns/mnt&#34;,</span>
+<span style="color:#75715e">#   &#34;NEWPID&#34;: &#34;/proc/13076/ns/pid&#34;,</span>
+<span style="color:#75715e">#   &#34;NEWUSER&#34;: &#34;/proc/13076/ns/user&#34;,</span>
+<span style="color:#75715e">#   &#34;NEWUTS&#34;: &#34;/proc/13076/ns/uts&#34;</span>
+<span style="color:#75715e"># }</span>
+<span style="color:#75715e"># $ ps -aux |grep 13076</span>
+<span style="color:#75715e"># vagrant  13076  0.0  0.3  58016  6848 ?        Ssl  13:09   0:00 runc init</span>
+<span style="color:#75715e"># # the `runc init` is the process that starts when `runc create` command is</span>
+<span style="color:#75715e"># # executed  and which keeps the namespaces alive</span>
+<span style="color:#75715e">#</span>
+</code></pre></div><p>It will then set bash enviroment variables (<code>CNI_*</code>) which contain runtime
 information like the network namespace.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">export NETCONFPATH<span style="color:#f92672">=</span>/opt/cni/netconfs
 export CNI_PATH<span style="color:#f92672">=</span>/opt/cni/bin/
 export CNI_CONTAINERID<span style="color:#f92672">=</span>cake
 export CNI_NETNS<span style="color:#f92672">=</span>/var/run/netns/cake
 export CNI_IFNAME<span style="color:#f92672">=</span>eth0
-export CNI_COMMAND<span style="color:#f92672">=</span>ADD</code></pre></div>
-<p>Finally it will call the CNI binary providing in the <code>stdin</code> the configuration
+export CNI_COMMAND<span style="color:#f92672">=</span>ADD
+</code></pre></div><p>Finally it will call the CNI binary providing in the <code>stdin</code> the configuration
 and the above variables. Runtime will get back the results in <code>json</code> format.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cat $NETCONFPATH/10-mynet.conf | $CNI_PATH/bridge
 
-<span style="color:#75715e"># $cat $NETCONFPATH/10-mynet.conf | $CNI_PATH/bridge
-</span><span style="color:#75715e"># {
-</span><span style="color:#75715e">#     &#34;cniVersion&#34;: &#34;0.2.0&#34;,
-</span><span style="color:#75715e">#     &#34;ip4&#34;: {
-</span><span style="color:#75715e">#         &#34;ip&#34;: &#34;10.10.10.2/24&#34;,
-</span><span style="color:#75715e">#         &#34;gateway&#34;: &#34;10.10.10.1&#34;,
-</span><span style="color:#75715e">#         &#34;routes&#34;: [
-</span><span style="color:#75715e">#             {
-</span><span style="color:#75715e">#                 &#34;dst&#34;: &#34;0.0.0.0/0&#34;,
-</span><span style="color:#75715e">#                 &#34;gw&#34;: &#34;10.10.10.1&#34;
-</span><span style="color:#75715e">#             }
-</span><span style="color:#75715e">#         ]
-</span><span style="color:#75715e">#     },
-</span><span style="color:#75715e">#     &#34;dns&#34;: {
-</span><span style="color:#75715e">#         &#34;nameservers&#34;: [
-</span><span style="color:#75715e">#             &#34;8.8.8.8&#34;
-</span><span style="color:#75715e">#         ]
-</span><span style="color:#75715e">#     }
-</span><span style="color:#75715e"># }
-</span><span style="color:#75715e"></span># </code></pre></div>
-<p>We can observe by running <code>ip</code> commands inside the container network space that
+<span style="color:#75715e"># $cat $NETCONFPATH/10-mynet.conf | $CNI_PATH/bridge</span>
+<span style="color:#75715e"># {</span>
+<span style="color:#75715e">#     &#34;cniVersion&#34;: &#34;0.2.0&#34;,</span>
+<span style="color:#75715e">#     &#34;ip4&#34;: {</span>
+<span style="color:#75715e">#         &#34;ip&#34;: &#34;10.10.10.2/24&#34;,</span>
+<span style="color:#75715e">#         &#34;gateway&#34;: &#34;10.10.10.1&#34;,</span>
+<span style="color:#75715e">#         &#34;routes&#34;: [</span>
+<span style="color:#75715e">#             {</span>
+<span style="color:#75715e">#                 &#34;dst&#34;: &#34;0.0.0.0/0&#34;,</span>
+<span style="color:#75715e">#                 &#34;gw&#34;: &#34;10.10.10.1&#34;</span>
+<span style="color:#75715e">#             }</span>
+<span style="color:#75715e">#         ]</span>
+<span style="color:#75715e">#     },</span>
+<span style="color:#75715e">#     &#34;dns&#34;: {</span>
+<span style="color:#75715e">#         &#34;nameservers&#34;: [</span>
+<span style="color:#75715e">#             &#34;8.8.8.8&#34;</span>
+<span style="color:#75715e">#         ]</span>
+<span style="color:#75715e">#     }</span>
+<span style="color:#75715e"># }</span>
+<span style="color:#75715e"># </span>
+</code></pre></div><p>We can observe by running <code>ip</code> commands inside the container network space that
 the interface has been properly set up.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># $ ip netns exec cake ip a s eth0
-</span><span style="color:#75715e"># 3: eth0@if5: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP group default
-</span><span style="color:#75715e">#     link/ether d6:d6:48:92:b3:25 brd ff:ff:ff:ff:ff:ff link-netnsid 0
-</span><span style="color:#75715e">#     inet 10.10.10.2/24 scope global eth0
-</span><span style="color:#75715e">#        valid_lft forever preferred_lft forever
-</span><span style="color:#75715e">#     inet6 fe80::d4d6:48ff:fe92:b325/64 scope link
-</span><span style="color:#75715e">#        valid_lft forever preferred_lft forever
-</span><span style="color:#75715e"># $ ip netns exec cake ip route
-</span><span style="color:#75715e"># default via 10.10.10.1 dev eth0
-</span><span style="color:#75715e"># 10.10.10.0/24 dev eth0  proto kernel  scope link  src 10.10.10.2
-</span><span style="color:#75715e"></span>#</code></pre></div>
-<p>From the result output, one thing that is a bit confusing is the DNS result
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># $ ip netns exec cake ip a s eth0</span>
+<span style="color:#75715e"># 3: eth0@if5: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP group default</span>
+<span style="color:#75715e">#     link/ether d6:d6:48:92:b3:25 brd ff:ff:ff:ff:ff:ff link-netnsid 0</span>
+<span style="color:#75715e">#     inet 10.10.10.2/24 scope global eth0</span>
+<span style="color:#75715e">#        valid_lft forever preferred_lft forever</span>
+<span style="color:#75715e">#     inet6 fe80::d4d6:48ff:fe92:b325/64 scope link</span>
+<span style="color:#75715e">#        valid_lft forever preferred_lft forever</span>
+<span style="color:#75715e"># $ ip netns exec cake ip route</span>
+<span style="color:#75715e"># default via 10.10.10.1 dev eth0</span>
+<span style="color:#75715e"># 10.10.10.0/24 dev eth0  proto kernel  scope link  src 10.10.10.2</span>
+<span style="color:#75715e">#</span>
+</code></pre></div><p>From the result output, one thing that is a bit confusing is the DNS result
 entry.  CNI plugin do not actually apply the DNS entry (aka. write the
 <code>/etc/resolv.conf</code>).  The plugins simply return the value, and the Container
 Runtime is expected to apply the DNS server.</p>
-
 <p>The delete case works simply by changing the action <code>CNI_COMMAND</code></p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">export CNI_COMMAND<span style="color:#f92672">=</span>DEL
 cat $NETCONFPATH/10-mynet.conf | $CNI_PATH/bridge
-# no output expected when success</code></pre></div>
-<h2 id="multi-interface-case">Multi-Interface Case</h2>
-
+<span style="color:#75715e"># no output expected when success</span>
+</code></pre></div><h2 id="multi-interface-case">Multi-Interface Case</h2>
 <p>Often there is a need for connecting a container to more than one networks.
 This can happen through multiple network configurations in <code>$NETCONFPATH</code></p>
-
 <p>The expected behavior of a runtime can be demonstrated in the following
 <code>bash snippet</code></p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">export CNI_COMMAND<span style="color:#f92672">=</span>ADD
@@ -402,11 +393,9 @@ This can happen through multiple network configurations in <code>$NETCONFPATH</c
   echo <span style="color:#e6db74">&#34;cat </span>$conf<span style="color:#e6db74"> | </span>$CNI_PATH<span style="color:#e6db74">/</span>$plugin<span style="color:#e6db74">&#34;</span>
   res<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>cat $conf | $CNI_PATH/$plugin<span style="color:#66d9ef">)</span>
   echo $res | jq -r .
-<span style="color:#66d9ef">done</span></code></pre></div>
-<p>It basically loops over each network configuration and adds a normal.</p>
-
+<span style="color:#66d9ef">done</span>
+</code></pre></div><p>It basically loops over each network configuration and adds a normal.</p>
 <h1 id="take-away-notes">Take Away Notes</h1>
-
 <p>CNI is about all the network-related actions that take place during the
 creation or the deletion of a container, it is not about realtime changes (e.g.
 policy enforcement). CNI will create all the rules to reassure a connection
@@ -416,106 +405,133 @@ different hosts.  CNI targets to hide the network complexity in order to make
 the runtime code-base cleaner and in the same time to enable third party
 providers to create their own plugins and integrate them easily to all
 container orchestrators that are using a CNI compatible runtime.</p>
-
 <h2 id="links">Links</h2>
-
 <p>Some nice readings on the topic</p>
-
 <ol>
-<li><a href="http://blog.mbrt.it/2017-10-01-demystifying-container-networking/#sec-3" target="_blank">demystifying-container-networking</a></li>
-<li><a href="http://www.dasblinkenlichten.com/understanding-cni-container-networking-interface/" target="_blank">understanding-cni-container-networking-interface/</a></li>
-<li><a href="https://jvns.ca/blog/2016/12/22/container-networking/" target="_blank">container-networking</a></li>
+<li><a href="http://blog.mbrt.it/2017-10-01-demystifying-container-networking/#sec-3">demystifying-container-networking</a></li>
+<li><a href="http://www.dasblinkenlichten.com/understanding-cni-container-networking-interface/">understanding-cni-container-networking-interface/</a></li>
+<li><a href="https://jvns.ca/blog/2016/12/22/container-networking/">container-networking</a></li>
 </ol>
 
 </div>
 
-    
-<footer class='entry-footer-container'>
-  <div class='entry-footer'>
-  <div class='tags'>
-  <span class='taxonomyTerm-icon'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
   
-  <path d="M20.59,13.41l-7.17,7.17a2,2,0,0,1-2.83,0L2,12V2H12l8.59,8.59A2,2,0,0,1,20.59,13.41Z"/>
-  <line x1="7" y1="7" x2="7" y2="7"/>
-  
+<footer class='entry-footer'>
+  <div class='container sep-before'><div class='tags'><svg
+  class="icon"
+  xmlns="http://www.w3.org/2000/svg"
+  viewbox="0 0 24 24"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  stroke-width="2"
+  aria-hidden="true"
+><path d="M20.59,13.41l-7.17,7.17a2,2,0,0,1-2.83,0L2,12V2H12l8.59,8.59A2,2,0,0,1,20.59,13.41Z" />
+<line x1="7" y1="7" x2="7" y2="7" />
 </svg>
-</span>
-  <span class='screen-reader'>Tags: </span><a class='tag' href='/tags/container-networking'>Container-networking</a>, <a class='tag' href='/tags/cni'>CNI</a>, <a class='tag' href='/tags/kubernetes'>Kubernetes</a>, <a class='tag' href='/tags/linux'>Linux</a></div>
+<span class='screen-reader-text'>Tags: </span><a class='tag' href='/tags/container-networking/'>container-networking</a>, <a class='tag' href='/tags/cni/'>CNI</a>, <a class='tag' href='/tags/kubernetes/'>kubernetes</a>, <a class='tag' href='/tags/linux/'>Linux</a></div>
 
   </div>
 </footer>
 
 
-  </article>
-  
-<nav class='entry-nav-container'>
-  <div class='entry-nav'><div class='next-entry'>
+</article>
+
+<nav class='entry-nav'>
+  <div class='container'><div class='next-entry sep-before'>
       <a href='/posts/chained-plugins-cni/'>
-        <span class='screen-reader'>Next post: </span>Chaining CNI Plugins<span aria-hidden='true'>Next <svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
-  
-  <line x1="4" y1="12" x2="20" y2="12"/>
-  <polyline points="14 6 20 12 14 18"/>
-  
+        <span class='screen-reader-text'>Next post: </span>Chaining CNI Plugins<span aria-hidden='true'>Next <svg
+  class="icon"
+  xmlns="http://www.w3.org/2000/svg"
+  viewbox="0 0 24 24"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  stroke-width="2"
+  aria-hidden="true"
+><line x1="4" y1="12" x2="20" y2="12" />
+<polyline points="14 6 20 12 14 18" />
 </svg>
 </span>
       </a>
     </div></div>
 </nav>
 
-  
-</main>
 
-    <footer id='footer' class='footer-container'>
-      <div class='footer'>
-        <div class='social-menu-container'>
-  <nav aria-label='Social Menu'>
-    <ul class='social-menu'><li>
-        <a href='https://github.com/karampok' target='_blank' rel='noopener'>
-          <span class='screen-reader'>Open Github account in new tab</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
-  
-  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
-  
+
+
+      </main>
+
+      <footer id='footer' class='footer'>
+        <div class='container sep-before'><section class='widget widget-social_menu sep-after'><nav aria-label='Social Menu'>
+    <ul><li>
+        <a href='https://github.com/karampok' target='_blank' rel='noopener me'>
+          <span class='screen-reader-text'>Open Github account in new tab</span><svg
+  class="icon"
+  xmlns="http://www.w3.org/2000/svg"
+  viewbox="0 0 24 24"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  stroke-width="2"
+  aria-hidden="true"
+><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
 </svg>
 </a>
       </li><li>
-        <a href='https://twitter.com/karampok' target='_blank' rel='noopener'>
-          <span class='screen-reader'>Open Twitter account in new tab</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
-  
-  <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
-  
+        <a href='https://twitter.com/karampok' target='_blank' rel='noopener me'>
+          <span class='screen-reader-text'>Open Twitter account in new tab</span><svg
+  class="icon"
+  xmlns="http://www.w3.org/2000/svg"
+  viewbox="0 0 24 24"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  stroke-width="2"
+  aria-hidden="true"
+><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
 </svg>
 </a>
       </li><li>
-        <a href='mailto:karampok&#43;site@gmail.com' target='_blank' rel='noopener'>
-          <span class='screen-reader'>Contact via Email</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
-  
-  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-  <polyline points="22,6 12,13 2,6"/>
-  
+        <a href='mailto:karampok&#43;site@gmail.com' target='_blank' rel='noopener me'>
+          <span class='screen-reader-text'>Contact via Email</span><svg
+  class="icon"
+  xmlns="http://www.w3.org/2000/svg"
+  viewbox="0 0 24 24"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  stroke-width="2"
+  aria-hidden="true"
+><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+<polyline points="22,6 12,13 2,6" />
 </svg>
 </a>
       </li><li>
-        <a href='https://linkedin.com/in/kkarampogias' target='_blank' rel='noopener'>
-          <span class='screen-reader'>Open Linkedin account in new tab</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
-  
-  <path stroke-width="1.8" d="m5.839218,4.101561c0,1.211972 -0.974141,2.194011 -2.176459,2.194011s-2.176459,-0.982039 -2.176459,-2.194011c0,-1.211094 0.974141,-2.194011 2.176459,-2.194011s2.176459,0.982917 2.176459,2.194011zm0.017552,3.94922l-4.388022,0l0,14.04167l4.388022,0l0,-14.04167zm7.005038,0l-4.359939,0l0,14.04167l4.360816,0l0,-7.370999c0,-4.098413 5.291077,-4.433657 5.291077,0l0,7.370999l4.377491,0l0,-8.89101c0,-6.915523 -7.829986,-6.66365 -9.669445,-3.259423l0,-1.891237z"/>
-  
+        <a href='https://linkedin.com/in/kkarmapogias@gmail.com' target='_blank' rel='noopener me'>
+          <span class='screen-reader-text'>Open Linkedin account in new tab</span><svg
+  class="icon"
+  xmlns="http://www.w3.org/2000/svg"
+  viewbox="0 0 24 24"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  stroke-width="2"
+  aria-hidden="true"
+><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+<rect x="2" y="9" width="4" height="12" />
+<circle cx="4" cy="4" r="2" />
 </svg>
 </a>
       </li></ul>
   </nav>
-</div>
-        <div class='copyright'>
-  <p>
-
-       &copy; 2018 karampok 
-  </p>
+</section><div class='copyright'>
+  <p> &copy; 2018-2021 karampok </p>
 </div>
 
-      </div>
-    </footer>
+        </div>
+      </footer>
 
-  </div><script src='/assets/js/main.5871befd.js'></script><script src='/js/custom.js'></script></body>
+    </div>
+  </div><script>window.__assets_js_src="/assets/js/"</script>
+
+<script src='/assets/js/main.c3bcf2df.js'></script><script src='/js/custom.js'></script>
+
+</body>
 
 </html>
 

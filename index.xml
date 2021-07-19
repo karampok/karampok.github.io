@@ -1,24 +1,18 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>home on Konstantinos Karampogias</title>
     <link>http://www.karampok.me/</link>
     <description>Recent content in home on Konstantinos Karampogias</description>
     <generator>Hugo -- gohugo.io</generator>
-    <lastBuildDate>Sun, 11 Feb 2018 21:06:48 +0100</lastBuildDate>
-    
-	<atom:link href="http://www.karampok.me/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Sun, 11 Feb 2018 21:06:48 +0100</lastBuildDate><atom:link href="http://www.karampok.me/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>About</title>
       <link>http://www.karampok.me/about/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>http://www.karampok.me/about/</guid>
-      <description>Software/Network Engineer, who enjoys facing new challenges and working on solutions that guarantee a stable and efficient environment. I am an open source and Linux hands-on enthusiast, but most importantly a engineer with a wide range of skills.
-Fields of Interest
-Networking, Containers, Kubernetes, Cloudfoundry Software Defined Networking (SDN) Cloud Computing/Virtualization Software Engineering in Go</description>
+      <description>Software/Network Engineer, who enjoys facing new challenges and working on solutions that guarantee a stable and efficient environment. I am an open source and Linux hands-on enthusiast, but most importantly a engineer with a wide range of skills.</description>
     </item>
     
     <item>

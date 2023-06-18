@@ -11,7 +11,7 @@
 <meta property='og:site_name' content='Konstantinos Karampogias'>
 <meta property='og:type' content='article'><meta property='og:image' content='https://www.gravatar.com/avatar/265e87c7ecf5a798c566e9f7549fd8c6?s=256'><meta property='article:section' content='posts'><meta property='article:tag' content='container-networking'><meta property='article:tag' content='CNI'><meta property='article:tag' content='kubernetes'><meta property='article:tag' content='Linux'><meta property='article:published_time' content='2018-01-20T12:00:00&#43;06:00'/><meta property='article:modified_time' content='2018-01-20T12:00:00&#43;06:00'/><meta name='twitter:card' content='summary'><meta name='twitter:creator' content='@karampok'>
 
-<meta name="generator" content="Hugo 0.87.0" />
+<meta name="generator" content="Hugo 0.113.0">
 
   <title>How a Container Runtime is using CNI • Konstantinos Karampogias</title>
   <link rel='canonical' href='http://www.karampok.me/posts/container-networking-with-cni/'>
@@ -22,25 +22,100 @@
 :root{--color-accent:#000000;}
 </style>
 
-<script type="application/javascript">
-var doNotTrack = false;
-if (!doNotTrack) {
-	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
-	ga('create', 'UA-112175593-1', 'auto');
-	
-	ga('send', 'pageview');
-}
-</script>
-<script async src='https://www.google-analytics.com/analytics.js'></script>
-
   
 
 </head>
-<body class='page type-posts'>
+<body class='page type-posts has-sidebar'>
 
-  <div class='site'><a class='screen-reader-text' href='#content'>Skip to Content</a><div class='main'><nav id='main-menu' class='menu main-menu' aria-label='Main Menu'>
-  <div class='container'>
+  <div class='site'><div id='sidebar' class='sidebar'>
+  <a class='screen-reader-text' href='#main-menu'>Skip to Main Menu</a>
+
+  <div class='container'><section class='widget widget-about sep-after'>
+  <header>
     
+    <div class='logo'>
+      <a href='/'>
+        <img src='/images/logo.png'>
+      </a>
+    </div>
+    
+    <h2 class='title site-title '>
+      <a href='/'>
+      Konstantinos Karampogias
+      </a>
+    </h2>
+    <div class='desc'>
+    software engineer
+    </div>
+  </header>
+
+</section>
+<section class='widget widget-search sep-after'>
+  <header>
+    <h4 class='title widget-title'>Search</h4>
+  </header>
+
+  <form action='/search' id='search-form' class='search-form'>
+    <label>
+      <span class='screen-reader-text'>Search</span>
+      <input id='search-term' class='search-term' type='search' name='q' placeholder='Search&hellip;'>
+    </label></form>
+
+</section>
+<section class='widget widget-taxonomy_cloud sep-after'>
+  <header>
+    <h4 class='title widget-title'>Tags</h4>
+  </header>
+
+  <div class='container list-container'>
+  <ul class='list taxonomy-cloud'><li>
+        <a href='/tags/cni/' style='font-size:1em'>CNI</a>
+      </li><li>
+        <a href='/tags/container-networking/' style='font-size:1em'>container-networking</a>
+      </li><li>
+        <a href='/tags/kubernetes/' style='font-size:1em'>kubernetes</a>
+      </li><li>
+        <a href='/tags/linux/' style='font-size:1em'>Linux</a>
+      </li></ul>
+</div>
+
+
+</section>
+</div>
+
+  <div class='sidebar-overlay'></div>
+</div><div class='main'><nav id='main-menu' class='menu main-menu' aria-label='Main Menu'>
+  <div class='container'>
+    <a class='screen-reader-text' href='#content'>Skip to Content</a>
+
+<button id='sidebar-toggler' class='sidebar-toggler' aria-controls='sidebar'>
+  <span class='screen-reader-text'>Toggle Sidebar</span>
+  <span class='open'><svg
+  class="icon"
+  xmlns="http://www.w3.org/2000/svg"
+  viewbox="0 0 24 24"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  stroke-width="2"
+  aria-hidden="true"
+><line x1="3" y1="12" x2="21" y2="12" />
+<line x1="3" y1="6" x2="21" y2="6" />
+<line x1="3" y1="18" x2="21" y2="18" />
+</svg>
+</span>
+  <span class='close'><svg
+  class="icon"
+  xmlns="http://www.w3.org/2000/svg"
+  viewbox="0 0 24 24"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  stroke-width="2"
+  aria-hidden="true"
+><line x1="18" y1="6" x2="6" y2="18" />
+<line x1="6" y1="6" x2="18" y2="18" />
+</svg>
+</span>
+</button>
     <ul><li class='item'>
         <a href='/'>home</a>
       </li><li class='item current'>
@@ -109,20 +184,6 @@ if (!doNotTrack) {
 </svg>
 <span class='screen-reader-text'> by </span><a href='/authors/karampok'>Konstantinos Karampogias</a></span>
   
-<span class='reading-time'><svg
-  class="icon"
-  xmlns="http://www.w3.org/2000/svg"
-  viewbox="0 0 24 24"
-  stroke-linecap="round"
-  stroke-linejoin="round"
-  stroke-width="2"
-  aria-hidden="true"
-><circle cx="12" cy="12" r="10" />
-<polyline points="12 6 12 12 15 15" />
-</svg>
-8 mins read
-</span>
-
 
 </div>
 
@@ -220,181 +281,181 @@ case we need the OCI-runtime binary (<code>runc</code>) and the CNI plugins bina
 (<code>bridge</code>, <code>host-local</code>).</p>
 <p>We can either download the pre-built binaries from the repos or we can build
 the binaries from source</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># as user</span>
-go get github.com/opencontainers/runc
-go get github.com/containernetworking/plugins
-cd $GOPATH/src/github.com/containernetworking/plugins
-./build.sh
-sudo mkdir -p /opt/cni/<span style="color:#f92672">{</span>bin,netconfs<span style="color:#f92672">}</span>
-sudo cp bin/* /opt/cni/bin/
-which /opt/cni/bin/<span style="color:#f92672">{</span>bridge,host-local<span style="color:#f92672">}</span> runc
-</code></pre></div><p>During the provision step, we create the bridge to where containers will be connected.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># as root</span>
-ip link add name br0 type bridge
-ip addr add 10.10.10.1/24 dev br0
-ip link set dev br0 up
-</code></pre></div><p>This step might not be required because the <code>bridge</code> plugin can create the
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># as user</span>
+</span></span><span style="display:flex;"><span>go get github.com/opencontainers/runc
+</span></span><span style="display:flex;"><span>go get github.com/containernetworking/plugins
+</span></span><span style="display:flex;"><span>cd $GOPATH/src/github.com/containernetworking/plugins
+</span></span><span style="display:flex;"><span>./build.sh
+</span></span><span style="display:flex;"><span>sudo mkdir -p /opt/cni/<span style="color:#f92672">{</span>bin,netconfs<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>sudo cp bin/* /opt/cni/bin/
+</span></span><span style="display:flex;"><span>which /opt/cni/bin/<span style="color:#f92672">{</span>bridge,host-local<span style="color:#f92672">}</span> runc
+</span></span></code></pre></div><p>During the provision step, we create the bridge to where containers will be connected.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># as root</span>
+</span></span><span style="display:flex;"><span>ip link add name br0 type bridge
+</span></span><span style="display:flex;"><span>ip addr add 10.10.10.1/24 dev br0
+</span></span><span style="display:flex;"><span>ip link set dev br0 up
+</span></span></code></pre></div><p>This step might not be required because the <code>bridge</code> plugin can create the
 bridge, but in principle setting up the network medium is not a task from
 the CNI plugin.</p>
 <p>Finally, we should add the network configuration somewhere on the filesystem.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># as root</span>
-export NETCONFPATH<span style="color:#f92672">=</span>/opt/cni/netconfs
-cat &gt; $NETCONFPATH/10-mynet.conf <span style="color:#e6db74">&lt;&lt;EOF
-</span><span style="color:#e6db74">{
-</span><span style="color:#e6db74">    &#34;cniVersion&#34;: &#34;0.2.0&#34;,
-</span><span style="color:#e6db74">    &#34;name&#34;: &#34;mynet&#34;,
-</span><span style="color:#e6db74">    &#34;type&#34;: &#34;bridge&#34;,
-</span><span style="color:#e6db74">    &#34;bridge&#34;: &#34;br0&#34;,             
-</span><span style="color:#e6db74">    &#34;isGateway&#34;: true,
-</span><span style="color:#e6db74">    &#34;ipMasq&#34;: true,
-</span><span style="color:#e6db74">    &#34;ipam&#34;: {
-</span><span style="color:#e6db74">        &#34;type&#34;: &#34;host-local&#34;,
-</span><span style="color:#e6db74">        &#34;subnet&#34;: &#34;10.10.10.0/24&#34;,
-</span><span style="color:#e6db74">        &#34;routes&#34;: [
-</span><span style="color:#e6db74">            { &#34;dst&#34;: &#34;0.0.0.0/0&#34; }
-</span><span style="color:#e6db74">        ],
-</span><span style="color:#e6db74">     &#34;dataDir&#34;: &#34;/run/ipam-state&#34;
-</span><span style="color:#e6db74">    },
-</span><span style="color:#e6db74">    &#34;dns&#34;: {
-</span><span style="color:#e6db74">      &#34;nameservers&#34;: [ &#34;8.8.8.8&#34; ]
-</span><span style="color:#e6db74">    }
-</span><span style="color:#e6db74">}
-</span><span style="color:#e6db74">EOF</span>
-</code></pre></div><h3 id="runtime-phase">Runtime Phase</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># as root</span>
+</span></span><span style="display:flex;"><span>export NETCONFPATH<span style="color:#f92672">=</span>/opt/cni/netconfs
+</span></span><span style="display:flex;"><span>cat &gt; $NETCONFPATH/10-mynet.conf <span style="color:#e6db74">&lt;&lt;EOF
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">{
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;cniVersion&#34;: &#34;0.2.0&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;name&#34;: &#34;mynet&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;type&#34;: &#34;bridge&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;bridge&#34;: &#34;br0&#34;,             
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;isGateway&#34;: true,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;ipMasq&#34;: true,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;ipam&#34;: {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        &#34;type&#34;: &#34;host-local&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        &#34;subnet&#34;: &#34;10.10.10.0/24&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        &#34;routes&#34;: [
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            { &#34;dst&#34;: &#34;0.0.0.0/0&#34; }
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        ],
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">     &#34;dataDir&#34;: &#34;/run/ipam-state&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    },
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;dns&#34;: {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      &#34;nameservers&#34;: [ &#34;8.8.8.8&#34; ]
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    }
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">EOF</span>
+</span></span></code></pre></div><h3 id="runtime-phase">Runtime Phase</h3>
 <p>The container orchestrator will eventually instruct the container runtime to
 spin up a container.</p>
 <p>Runtime will do the following simplified steps [as shown in the figure above]</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Step 1: creates the rootfs directory</span>
-mkdir bundle <span style="color:#f92672">&amp;&amp;</span> cd bundle/
-mkdir -p rootfs <span style="color:#f92672">&amp;&amp;</span> docker export <span style="color:#66d9ef">$(</span>docker create busybox<span style="color:#66d9ef">)</span> | tar -C rootfs -xvf -
-
-<span style="color:#75715e"># Step 2:</span>
-<span style="color:#75715e"># a. creates the OCI runtime config</span>
-runc spec --rootless
-<span style="color:#75715e"># b. modifies the OCI runtime config accordingly </span>
-<span style="color:#75715e"># asks for a new network namespace, other changes e.g. tty</span>
-<span style="color:#75715e"># cat config.json |grep -A20 namespace</span>
-<span style="color:#75715e">#   &#34;namespaces&#34;: [</span>
-<span style="color:#75715e">#           {</span>
-<span style="color:#75715e">#                   &#34;type&#34;: &#34;pid&#34;</span>
-<span style="color:#75715e">#           },</span>
-<span style="color:#75715e">#           {</span>
-<span style="color:#75715e">#                   &#34;type&#34;: &#34;ipc&#34;</span>
-<span style="color:#75715e">#           },</span>
-<span style="color:#75715e">#           {</span>
-<span style="color:#75715e">#                   &#34;type&#34;: &#34;uts&#34;</span>
-<span style="color:#75715e">#           },</span>
-<span style="color:#75715e">#           {</span>
-<span style="color:#75715e">#                   &#34;type&#34;: &#34;mount&#34;</span>
-<span style="color:#75715e">#           },</span>
-<span style="color:#75715e">#           {</span>
-<span style="color:#75715e">#                   &#34;type&#34;: &#34;user&#34;</span>
-<span style="color:#75715e">#           },</span>
-<span style="color:#75715e">#           {</span>
-<span style="color:#75715e">#                   &#34;type&#34;: &#34;network&#34; &lt;--adds network namespace</span>
-<span style="color:#75715e">#           }</span>
-<span style="color:#75715e">#   ],</span>
-<span style="color:#75715e">#   &#34;maskedPaths&#34;: [</span>
-<span style="color:#75715e">#</span>
-
-<span style="color:#75715e"># c. creates the container  </span>
-runc create cake
-
-<span style="color:#75715e"># $ runc list</span>
-<span style="color:#75715e"># ID          PID         STATUS      BUNDLE                 CREATED                          OWNER</span>
-<span style="color:#75715e"># cake        13076       created     /home/vagrant/bundle   2018-01-22T13:09:40.326479248Z   vagrant</span>
-
-runc exec -t -c <span style="color:#e6db74">&#34;CAP_NET_RAW&#34;</span> cake sh  <span style="color:#75715e"># To enter the container</span>
-</code></pre></div><p>The Container Runtime needs to get back the newly created network namespace.
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Step 1: creates the rootfs directory</span>
+</span></span><span style="display:flex;"><span>mkdir bundle <span style="color:#f92672">&amp;&amp;</span> cd bundle/
+</span></span><span style="display:flex;"><span>mkdir -p rootfs <span style="color:#f92672">&amp;&amp;</span> docker export <span style="color:#66d9ef">$(</span>docker create busybox<span style="color:#66d9ef">)</span> | tar -C rootfs -xvf -
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Step 2:</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># a. creates the OCI runtime config</span>
+</span></span><span style="display:flex;"><span>runc spec --rootless
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># b. modifies the OCI runtime config accordingly </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># asks for a new network namespace, other changes e.g. tty</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># cat config.json |grep -A20 namespace</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#   &#34;namespaces&#34;: [</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#           {</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#                   &#34;type&#34;: &#34;pid&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#           },</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#           {</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#                   &#34;type&#34;: &#34;ipc&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#           },</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#           {</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#                   &#34;type&#34;: &#34;uts&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#           },</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#           {</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#                   &#34;type&#34;: &#34;mount&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#           },</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#           {</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#                   &#34;type&#34;: &#34;user&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#           },</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#           {</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#                   &#34;type&#34;: &#34;network&#34; &lt;--adds network namespace</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#           }</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#   ],</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#   &#34;maskedPaths&#34;: [</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># c. creates the container  </span>
+</span></span><span style="display:flex;"><span>runc create cake
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># $ runc list</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># ID          PID         STATUS      BUNDLE                 CREATED                          OWNER</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># cake        13076       created     /home/vagrant/bundle   2018-01-22T13:09:40.326479248Z   vagrant</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>runc exec -t -c <span style="color:#e6db74">&#34;CAP_NET_RAW&#34;</span> cake sh  <span style="color:#75715e"># To enter the container</span>
+</span></span></code></pre></div><p>The Container Runtime needs to get back the newly created network namespace.
 In the <code>runc</code> case, this can be done through the <code>state.json</code> file.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># as root</span>
-ns<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>cat /var/run/user/1000/runc/cake/state.json | jq <span style="color:#e6db74">&#39;.namespace_paths.NEWNET&#39;</span> -r<span style="color:#66d9ef">)</span>
-mkdir -p /var/run/netns
-ln -sf $ns /var/run/netns/cake
-ip netns
-
-<span style="color:#75715e"># cat /var/run/user/1000/runc/cake/state.json | jq &#39;.namespace_paths&#39;</span>
-<span style="color:#75715e"># {</span>
-<span style="color:#75715e">#   &#34;NEWIPC&#34;: &#34;/proc/13076/ns/ipc&#34;,</span>
-<span style="color:#75715e">#   &#34;NEWNET&#34;: &#34;/proc/13076/ns/net&#34;,</span>
-<span style="color:#75715e">#   &#34;NEWNS&#34;: &#34;/proc/13076/ns/mnt&#34;,</span>
-<span style="color:#75715e">#   &#34;NEWPID&#34;: &#34;/proc/13076/ns/pid&#34;,</span>
-<span style="color:#75715e">#   &#34;NEWUSER&#34;: &#34;/proc/13076/ns/user&#34;,</span>
-<span style="color:#75715e">#   &#34;NEWUTS&#34;: &#34;/proc/13076/ns/uts&#34;</span>
-<span style="color:#75715e"># }</span>
-<span style="color:#75715e"># $ ps -aux |grep 13076</span>
-<span style="color:#75715e"># vagrant  13076  0.0  0.3  58016  6848 ?        Ssl  13:09   0:00 runc init</span>
-<span style="color:#75715e"># # the `runc init` is the process that starts when `runc create` command is</span>
-<span style="color:#75715e"># # executed  and which keeps the namespaces alive</span>
-<span style="color:#75715e">#</span>
-</code></pre></div><p>It will then set bash enviroment variables (<code>CNI_*</code>) which contain runtime
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># as root</span>
+</span></span><span style="display:flex;"><span>ns<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>cat /var/run/user/1000/runc/cake/state.json | jq <span style="color:#e6db74">&#39;.namespace_paths.NEWNET&#39;</span> -r<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>mkdir -p /var/run/netns
+</span></span><span style="display:flex;"><span>ln -sf $ns /var/run/netns/cake
+</span></span><span style="display:flex;"><span>ip netns
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># cat /var/run/user/1000/runc/cake/state.json | jq &#39;.namespace_paths&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># {</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#   &#34;NEWIPC&#34;: &#34;/proc/13076/ns/ipc&#34;,</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#   &#34;NEWNET&#34;: &#34;/proc/13076/ns/net&#34;,</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#   &#34;NEWNS&#34;: &#34;/proc/13076/ns/mnt&#34;,</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#   &#34;NEWPID&#34;: &#34;/proc/13076/ns/pid&#34;,</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#   &#34;NEWUSER&#34;: &#34;/proc/13076/ns/user&#34;,</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#   &#34;NEWUTS&#34;: &#34;/proc/13076/ns/uts&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># }</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># $ ps -aux |grep 13076</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># vagrant  13076  0.0  0.3  58016  6848 ?        Ssl  13:09   0:00 runc init</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># # the `runc init` is the process that starts when `runc create` command is</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># # executed  and which keeps the namespaces alive</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#</span>
+</span></span></code></pre></div><p>It will then set bash enviroment variables (<code>CNI_*</code>) which contain runtime
 information like the network namespace.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">export NETCONFPATH<span style="color:#f92672">=</span>/opt/cni/netconfs
-export CNI_PATH<span style="color:#f92672">=</span>/opt/cni/bin/
-export CNI_CONTAINERID<span style="color:#f92672">=</span>cake
-export CNI_NETNS<span style="color:#f92672">=</span>/var/run/netns/cake
-export CNI_IFNAME<span style="color:#f92672">=</span>eth0
-export CNI_COMMAND<span style="color:#f92672">=</span>ADD
-</code></pre></div><p>Finally it will call the CNI binary providing in the <code>stdin</code> the configuration
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>export NETCONFPATH<span style="color:#f92672">=</span>/opt/cni/netconfs
+</span></span><span style="display:flex;"><span>export CNI_PATH<span style="color:#f92672">=</span>/opt/cni/bin/
+</span></span><span style="display:flex;"><span>export CNI_CONTAINERID<span style="color:#f92672">=</span>cake
+</span></span><span style="display:flex;"><span>export CNI_NETNS<span style="color:#f92672">=</span>/var/run/netns/cake
+</span></span><span style="display:flex;"><span>export CNI_IFNAME<span style="color:#f92672">=</span>eth0
+</span></span><span style="display:flex;"><span>export CNI_COMMAND<span style="color:#f92672">=</span>ADD
+</span></span></code></pre></div><p>Finally it will call the CNI binary providing in the <code>stdin</code> the configuration
 and the above variables. Runtime will get back the results in <code>json</code> format.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cat $NETCONFPATH/10-mynet.conf | $CNI_PATH/bridge
-
-<span style="color:#75715e"># $cat $NETCONFPATH/10-mynet.conf | $CNI_PATH/bridge</span>
-<span style="color:#75715e"># {</span>
-<span style="color:#75715e">#     &#34;cniVersion&#34;: &#34;0.2.0&#34;,</span>
-<span style="color:#75715e">#     &#34;ip4&#34;: {</span>
-<span style="color:#75715e">#         &#34;ip&#34;: &#34;10.10.10.2/24&#34;,</span>
-<span style="color:#75715e">#         &#34;gateway&#34;: &#34;10.10.10.1&#34;,</span>
-<span style="color:#75715e">#         &#34;routes&#34;: [</span>
-<span style="color:#75715e">#             {</span>
-<span style="color:#75715e">#                 &#34;dst&#34;: &#34;0.0.0.0/0&#34;,</span>
-<span style="color:#75715e">#                 &#34;gw&#34;: &#34;10.10.10.1&#34;</span>
-<span style="color:#75715e">#             }</span>
-<span style="color:#75715e">#         ]</span>
-<span style="color:#75715e">#     },</span>
-<span style="color:#75715e">#     &#34;dns&#34;: {</span>
-<span style="color:#75715e">#         &#34;nameservers&#34;: [</span>
-<span style="color:#75715e">#             &#34;8.8.8.8&#34;</span>
-<span style="color:#75715e">#         ]</span>
-<span style="color:#75715e">#     }</span>
-<span style="color:#75715e"># }</span>
-<span style="color:#75715e"># </span>
-</code></pre></div><p>We can observe by running <code>ip</code> commands inside the container network space that
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cat $NETCONFPATH/10-mynet.conf | $CNI_PATH/bridge
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># $cat $NETCONFPATH/10-mynet.conf | $CNI_PATH/bridge</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># {</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#     &#34;cniVersion&#34;: &#34;0.2.0&#34;,</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#     &#34;ip4&#34;: {</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#         &#34;ip&#34;: &#34;10.10.10.2/24&#34;,</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#         &#34;gateway&#34;: &#34;10.10.10.1&#34;,</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#         &#34;routes&#34;: [</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#             {</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#                 &#34;dst&#34;: &#34;0.0.0.0/0&#34;,</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#                 &#34;gw&#34;: &#34;10.10.10.1&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#             }</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#         ]</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#     },</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#     &#34;dns&#34;: {</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#         &#34;nameservers&#34;: [</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#             &#34;8.8.8.8&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#         ]</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#     }</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># }</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># </span>
+</span></span></code></pre></div><p>We can observe by running <code>ip</code> commands inside the container network space that
 the interface has been properly set up.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># $ ip netns exec cake ip a s eth0</span>
-<span style="color:#75715e"># 3: eth0@if5: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP group default</span>
-<span style="color:#75715e">#     link/ether d6:d6:48:92:b3:25 brd ff:ff:ff:ff:ff:ff link-netnsid 0</span>
-<span style="color:#75715e">#     inet 10.10.10.2/24 scope global eth0</span>
-<span style="color:#75715e">#        valid_lft forever preferred_lft forever</span>
-<span style="color:#75715e">#     inet6 fe80::d4d6:48ff:fe92:b325/64 scope link</span>
-<span style="color:#75715e">#        valid_lft forever preferred_lft forever</span>
-<span style="color:#75715e"># $ ip netns exec cake ip route</span>
-<span style="color:#75715e"># default via 10.10.10.1 dev eth0</span>
-<span style="color:#75715e"># 10.10.10.0/24 dev eth0  proto kernel  scope link  src 10.10.10.2</span>
-<span style="color:#75715e">#</span>
-</code></pre></div><p>From the result output, one thing that is a bit confusing is the DNS result
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># $ ip netns exec cake ip a s eth0</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 3: eth0@if5: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP group default</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#     link/ether d6:d6:48:92:b3:25 brd ff:ff:ff:ff:ff:ff link-netnsid 0</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#     inet 10.10.10.2/24 scope global eth0</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#        valid_lft forever preferred_lft forever</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#     inet6 fe80::d4d6:48ff:fe92:b325/64 scope link</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#        valid_lft forever preferred_lft forever</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># $ ip netns exec cake ip route</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># default via 10.10.10.1 dev eth0</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 10.10.10.0/24 dev eth0  proto kernel  scope link  src 10.10.10.2</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#</span>
+</span></span></code></pre></div><p>From the result output, one thing that is a bit confusing is the DNS result
 entry.  CNI plugin do not actually apply the DNS entry (aka. write the
 <code>/etc/resolv.conf</code>).  The plugins simply return the value, and the Container
 Runtime is expected to apply the DNS server.</p>
 <p>The delete case works simply by changing the action <code>CNI_COMMAND</code></p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">export CNI_COMMAND<span style="color:#f92672">=</span>DEL
-cat $NETCONFPATH/10-mynet.conf | $CNI_PATH/bridge
-<span style="color:#75715e"># no output expected when success</span>
-</code></pre></div><h2 id="multi-interface-case">Multi-Interface Case</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>export CNI_COMMAND<span style="color:#f92672">=</span>DEL
+</span></span><span style="display:flex;"><span>cat $NETCONFPATH/10-mynet.conf | $CNI_PATH/bridge
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># no output expected when success</span>
+</span></span></code></pre></div><h2 id="multi-interface-case">Multi-Interface Case</h2>
 <p>Often there is a need for connecting a container to more than one networks.
 This can happen through multiple network configurations in <code>$NETCONFPATH</code></p>
 <p>The expected behavior of a runtime can be demonstrated in the following
 <code>bash snippet</code></p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">export CNI_COMMAND<span style="color:#f92672">=</span>ADD
-<span style="color:#66d9ef">for</span> conf in $NETCONFPATH/*.conf; <span style="color:#66d9ef">do</span>
-  echo <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>CNI_COMMAND<span style="color:#e6db74">}</span><span style="color:#e6db74">ing </span>$conf<span style="color:#e6db74">&#34;</span>
-  export CNI_IFNAME<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>cat $conf | jq -r <span style="color:#e6db74">&#39;.name&#39;</span><span style="color:#66d9ef">)</span>
-  plugin<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>cat $conf |jq -r <span style="color:#e6db74">&#39;.type&#39;</span><span style="color:#66d9ef">)</span>
-  echo <span style="color:#e6db74">&#34;cat </span>$conf<span style="color:#e6db74"> | </span>$CNI_PATH<span style="color:#e6db74">/</span>$plugin<span style="color:#e6db74">&#34;</span>
-  res<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>cat $conf | $CNI_PATH/$plugin<span style="color:#66d9ef">)</span>
-  echo $res | jq -r .
-<span style="color:#66d9ef">done</span>
-</code></pre></div><p>It basically loops over each network configuration and adds a normal.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>export CNI_COMMAND<span style="color:#f92672">=</span>ADD
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> conf in $NETCONFPATH/*.conf; <span style="color:#66d9ef">do</span>
+</span></span><span style="display:flex;"><span>  echo <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>CNI_COMMAND<span style="color:#e6db74">}</span><span style="color:#e6db74">ing </span>$conf<span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  export CNI_IFNAME<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>cat $conf | jq -r <span style="color:#e6db74">&#39;.name&#39;</span><span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>  plugin<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>cat $conf |jq -r <span style="color:#e6db74">&#39;.type&#39;</span><span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>  echo <span style="color:#e6db74">&#34;cat </span>$conf<span style="color:#e6db74"> | </span>$CNI_PATH<span style="color:#e6db74">/</span>$plugin<span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  res<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>cat $conf | $CNI_PATH/$plugin<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>  echo $res | jq -r .
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">done</span>
+</span></span></code></pre></div><p>It basically loops over each network configuration and adds a normal.</p>
 <h1 id="take-away-notes">Take Away Notes</h1>
 <p>CNI is about all the network-related actions that take place during the
 creation or the deletion of a container, it is not about realtime changes (e.g.
@@ -520,7 +581,7 @@ container orchestrators that are using a CNI compatible runtime.</p>
       </li></ul>
   </nav>
 </section><div class='copyright'>
-  <p> &copy; 2018-2021 karampok </p>
+  <p> &copy; 2018-2023 karampok </p>
 </div>
 
         </div>

@@ -4,7 +4,8 @@
     <title>Opengraph on Konstantinos Karampogias</title>
     <link>http://www.karampok.me/tags/og/</link>
     <description>Recent content in Opengraph on Konstantinos Karampogias</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>en</language><atom:link href="http://www.karampok.me/tags/og/index.xml" rel="self" type="application/rss+xml" />
+    <generator>Hugo</generator>
+    <language>en</language>
+    <atom:link href="http://www.karampok.me/tags/og/index.xml" rel="self" type="application/rss+xml" />
   </channel>
 </rss>

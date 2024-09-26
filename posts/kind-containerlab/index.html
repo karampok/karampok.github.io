@@ -5,9 +5,9 @@
 <meta name='description' content='Why
 Using kind to spin up fast k8s clusters is great, but when it comes down
 to networking part e.g. multiple interfaces on the nodes or connect nodes to
-a complex network fabric, kind is limited. Containerlab on the other side make
-the build of network fabric easy. Containerlab and kind do work together
-link but AFAICT it works using a secondary
+a complex network fabric, kind is limited. Containerlab on the other side makes
+the build of network fabric easy. Containerlab and kind do work
+together but AFAICT it works using a secondary
 interface on the node, while the primary (=default routing) should remain to provide
 API access and internet connectivity.'>
 <meta name='theme-color' content='#000000'>
@@ -16,9 +16,9 @@ API access and internet connectivity.'>
 <meta property='og:description' content='Why
 Using kind to spin up fast k8s clusters is great, but when it comes down
 to networking part e.g. multiple interfaces on the nodes or connect nodes to
-a complex network fabric, kind is limited. Containerlab on the other side make
-the build of network fabric easy. Containerlab and kind do work together
-link but AFAICT it works using a secondary
+a complex network fabric, kind is limited. Containerlab on the other side makes
+the build of network fabric easy. Containerlab and kind do work
+together but AFAICT it works using a secondary
 interface on the node, while the primary (=default routing) should remain to provide
 API access and internet connectivity.'>
 <meta property='og:url' content='http://www.karampok.me/posts/kind-containerlab/'>
@@ -216,13 +216,13 @@ API access and internet connectivity.'>
   <h1 id="why">Why</h1>
 <p>Using kind to spin up fast k8s clusters is great, but when it comes down
 to networking part e.g. multiple interfaces on the nodes or connect nodes to
-a complex network fabric, kind is limited. Containerlab on the other side make
-the build of network fabric easy. Containerlab and kind do work together
-<a href="https://containerlab.dev/manual/kinds/k8s-kind/">link</a> but AFAICT it works using a secondary
+a complex network fabric, kind is limited. Containerlab on the other side makes
+the build of network fabric easy. Containerlab and kind do work
+<a href="https://containerlab.dev/manual/kinds/k8s-kind/">together</a> but AFAICT it works using a secondary
 interface on the node, while the primary (=default routing) should remain to provide
 API access and internet connectivity.</p>
 <h1 id="how-to-to-drop-the-docker-network">How to to drop the docker network</h1>
-<p>This is to remove the <code>eth0</code> interface from all nodes and keep the cluster healthy
+<p>This is to remove the <code>eth0</code> interface from all k8s nodes and keep the cluster healthy
 and connected.</p>
 <ol>
 <li>Configure <code>cluster.yaml</code> kind configuration to patch kubeadm and replace the node IPs/Certs.</li>
@@ -463,7 +463,7 @@ INFO[0003] Adding ssh config for containerlab nodes
 | 3 | clab-vlab-host-network | a6a72db33668 | quay.io/karampok/snife:latest                                                                | linux         | running | N/A            | N/A                  |
 | 4 | clab-vlab-tor1         | 3ace245e590e | quay.io/frrouting/frr:9.0.2                                                                  | linux         | running | N/A            | N/A                  |
 +---+------------------------+--------------+----------------------------------------------------------------------------------------------+---------------+---------+----------------+----------------------+
- ✓ Starting control-plane 🕹️ 
+ ✓ Starting control-plane 🕹️
  ✓ Installing CNI 🔌
  ✓ Installing StorageClass 💾
  ✓ Joining worker nodes 🚜

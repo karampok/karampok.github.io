@@ -6,26 +6,33 @@
     <description>Recent content in Tags on Konstantinos Karampogias</description>
     <generator>Hugo</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 11 Feb 2018 21:06:48 +0100</lastBuildDate>
+    <lastBuildDate>Thu, 26 Sep 2024 09:04:06 +0200</lastBuildDate>
     <atom:link href="http://www.karampok.me/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>CNI</title>
       <link>http://www.karampok.me/tags/cni/</link>
-      <pubDate>Sun, 11 Feb 2018 21:06:48 +0100</pubDate>
+      <pubDate>Thu, 26 Sep 2024 09:04:06 +0200</pubDate>
       <guid>http://www.karampok.me/tags/cni/</guid>
       <description></description>
     </item>
     <item>
       <title>Container-Networking</title>
       <link>http://www.karampok.me/tags/container-networking/</link>
-      <pubDate>Sun, 11 Feb 2018 21:06:48 +0100</pubDate>
+      <pubDate>Thu, 26 Sep 2024 09:04:06 +0200</pubDate>
       <guid>http://www.karampok.me/tags/container-networking/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Containerlab</title>
+      <link>http://www.karampok.me/tags/containerlab/</link>
+      <pubDate>Thu, 26 Sep 2024 09:04:06 +0200</pubDate>
+      <guid>http://www.karampok.me/tags/containerlab/</guid>
       <description></description>
     </item>
     <item>
       <title>Kubernetes</title>
       <link>http://www.karampok.me/tags/kubernetes/</link>
-      <pubDate>Sun, 11 Feb 2018 21:06:48 +0100</pubDate>
+      <pubDate>Thu, 26 Sep 2024 09:04:06 +0200</pubDate>
       <guid>http://www.karampok.me/tags/kubernetes/</guid>
       <description></description>
     </item>

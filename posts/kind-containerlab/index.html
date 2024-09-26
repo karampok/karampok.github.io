@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang='en' dir='auto'><head>
+  <meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<meta name='description' content='Why
+Using kind to spin up fast k8s clusters is great, but when it comes down
+to networking part e.g. multiple interfaces on the nodes or connect nodes to
+a complex network fabric, kind is limited. Containerlab on the other side make
+the build of network fabric easy. Containerlab and kind do work together
+link but AFAICT it works using a secondary
+interface on the node, while the primary (=default routing) should remain to provide
+API access and internet connectivity.'>
+<meta name='theme-color' content='#000000'>
+
+<meta property='og:title' content='Kind k8s cluster w/ containerlab w/o docker network • Konstantinos Karampogias'>
+<meta property='og:description' content='Why
+Using kind to spin up fast k8s clusters is great, but when it comes down
+to networking part e.g. multiple interfaces on the nodes or connect nodes to
+a complex network fabric, kind is limited. Containerlab on the other side make
+the build of network fabric easy. Containerlab and kind do work together
+link but AFAICT it works using a secondary
+interface on the node, while the primary (=default routing) should remain to provide
+API access and internet connectivity.'>
+<meta property='og:url' content='http://www.karampok.me/posts/kind-containerlab/'>
+<meta property='og:site_name' content='Konstantinos Karampogias'>
+<meta property='og:type' content='article'><meta property='og:image' content='https://www.gravatar.com/avatar/265e87c7ecf5a798c566e9f7549fd8c6?s=256'><meta property='article:section' content='posts'><meta property='article:tag' content='container-networking'><meta property='article:tag' content='CNI'><meta property='article:tag' content='kubernetes'><meta property='article:tag' content='containerlab'><meta property='article:published_time' content='2024-09-26T09:04:06&#43;02:00'/><meta property='article:modified_time' content='2024-09-26T09:04:06&#43;02:00'/><meta name='twitter:card' content='summary'><meta name='twitter:creator' content='@karampok'>
+
+<meta name="generator" content="Hugo 0.134.3">
+
+  <title>Kind k8s cluster w/ containerlab w/o docker network • Konstantinos Karampogias</title>
+  <link rel='canonical' href='http://www.karampok.me/posts/kind-containerlab/'>
+  
+  
+  <link rel='icon' href='/favicon.ico'>
+<link rel='stylesheet' href='/assets/css/main.ab98e12b.css'><link rel='stylesheet' href='/css/custom.css'><style>
+:root{--color-accent:#000000;}
+</style>
+
+  
+
+</head>
+<body class='page type-posts has-sidebar'>
+
+  <div class='site'><div id='sidebar' class='sidebar'>
+  <a class='screen-reader-text' href='#main-menu'>Skip to Main Menu</a>
+
+  <div class='container'><section class='widget widget-about sep-after'>
+  <header>
+    
+    <div class='logo'>
+      <a href='/'>
+        <img src='/images/logo.png'>
+      </a>
+    </div>
+    
+    <h2 class='title site-title '>
+      <a href='/'>
+      Konstantinos Karampogias
+      </a>
+    </h2>
+    <div class='desc'>
+    software engineer
+    </div>
+  </header>
+
+</section>
+<section class='widget widget-search sep-after'>
+  <header>
+    <h4 class='title widget-title'>Search</h4>
+  </header>
+
+  <form action='/search' id='search-form' class='search-form'>
+    <label>
+      <span class='screen-reader-text'>Search</span>
+      <input id='search-term' class='search-term' type='search' name='q' placeholder='Search&hellip;'>
+    </label></form>
+
+</section>
+<section class='widget widget-taxonomy_cloud sep-after'>
+  <header>
+    <h4 class='title widget-title'>Tags</h4>
+  </header>
+
+  <div class='container list-container'>
+  <ul class='list taxonomy-cloud'><li>
+        <a href='/tags/cni/' style='font-size:2em'>CNI</a>
+      </li><li>
+        <a href='/tags/container-networking/' style='font-size:2em'>Container-Networking</a>
+      </li><li>
+        <a href='/tags/containerlab/' style='font-size:1em'>Containerlab</a>
+      </li><li>
+        <a href='/tags/kubernetes/' style='font-size:2em'>Kubernetes</a>
+      </li><li>
+        <a href='/tags/linux/' style='font-size:1.5em'>Linux</a>
+      </li></ul>
+</div>
+
+
+</section>
+</div>
+
+  <div class='sidebar-overlay'></div>
+</div><div class='main'><nav id='main-menu' class='menu main-menu' aria-label='Main Menu'>
+  <div class='container'>
+    <a class='screen-reader-text' href='#content'>Skip to Content</a>
+
+<button id='sidebar-toggler' class='sidebar-toggler' aria-controls='sidebar'>
+  <span class='screen-reader-text'>Toggle Sidebar</span>
+  <span class='open'><svg
+  class="icon"
+  xmlns="http://www.w3.org/2000/svg"
+  viewbox="0 0 24 24"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  stroke-width="2"
+  aria-hidden="true"
+><line x1="3" y1="12" x2="21" y2="12" />
+<line x1="3" y1="6" x2="21" y2="6" />
+<line x1="3" y1="18" x2="21" y2="18" />
+</svg>
+</span>
+  <span class='close'><svg
+  class="icon"
+  xmlns="http://www.w3.org/2000/svg"
+  viewbox="0 0 24 24"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  stroke-width="2"
+  aria-hidden="true"
+><line x1="18" y1="6" x2="6" y2="18" />
+<line x1="6" y1="6" x2="18" y2="18" />
+</svg>
+</span>
+</button>
+    <ul><li class='item'>
+        <a href='/'>home</a>
+      </li><li class='item current'>
+        <a aria-current='page' href='/posts/'>posts</a>
+      </li><li class='item'>
+        <a href='/about/'>about</a>
+      </li></ul>
+  </div>
+</nav><div class='header-widgets'>
+        <div class='container'>
+    
+    <style>.widget-breadcrumbs li:after{content:'\2f '}</style>
+  <section class='widget widget-breadcrumbs sep-after'>
+    <nav id='breadcrumbs'>
+      <ol><li><a href='/'>home</a></li><li><a href='/posts/'>posts</a></li><li><span>Kind k8s cluster w/ containerlab w/o docker network</span></li></ol>
+    </nav>
+  </section></div>
+      </div>
+
+      <header id='header' class='header site-header'>
+        <div class='container sep-after'>
+          <div class='header-info'><p class='site-title title'>Konstantinos Karampogias</p><p class='desc site-desc'>software engineer</p>
+          </div>
+        </div>
+      </header>
+
+      <main id='content'>
+
+
+<article lang='en' class='entry'>
+  <header class='header entry-header'>
+  <div class='container sep-after'>
+    <div class='header-info'>
+      <h1 class='title'>Kind k8s cluster w/ containerlab w/o docker network</h1>
+      
+
+    </div>
+    <div class='entry-meta'>
+  <span class='posted-on'><svg
+  class="icon"
+  xmlns="http://www.w3.org/2000/svg"
+  viewbox="0 0 24 24"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  stroke-width="2"
+  aria-hidden="true"
+><rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+<line x1="16" y1="2" x2="16" y2="6" />
+<line x1="8" y1="2" x2="8" y2="6" />
+<line x1="3" y1="10" x2="21" y2="10" />
+</svg>
+<span class='screen-reader-text'>Posted on </span>
+  <time class='entry-date' datetime='2024-09-26T09:04:06&#43;02:00'>2024, Sep 26</time>
+</span>
+
+  <span class='byline'><svg
+  class="icon"
+  xmlns="http://www.w3.org/2000/svg"
+  viewbox="0 0 24 24"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  stroke-width="2"
+  aria-hidden="true"
+><path d="M21,21V20c0-2.76-4-5-9-5s-9,2.24-9,5v1" />
+<path d="M16,6.37A4,4,0,1,1,12.63,3,4,4,0,0,1,16,6.37Z" />
+</svg>
+<span class='screen-reader-text'> by </span><a href='/authors/karampok'>Konstantinos Karampogias</a></span>
+  
+
+</div>
+
+
+  </div>
+</header>
+
+  
+  
+
+  <div class='container entry-content'>
+  <h1 id="why">Why</h1>
+<p>Using kind to spin up fast k8s clusters is great, but when it comes down
+to networking part e.g. multiple interfaces on the nodes or connect nodes to
+a complex network fabric, kind is limited. Containerlab on the other side make
+the build of network fabric easy. Containerlab and kind do work together
+<a href="https://containerlab.dev/manual/kinds/k8s-kind/">link</a> but AFAICT it works using a secondary
+interface on the node, while the primary (=default routing) should remain to provide
+API access and internet connectivity.</p>
+<h1 id="how-to-to-drop-the-docker-network">How to to drop the docker network</h1>
+<p>This is to remove the <code>eth0</code> interface from all nodes and keep the cluster healthy
+and connected.</p>
+<ol>
+<li>Configure <code>cluster.yaml</code> kind configuration to patch kubeadm and replace the node IPs/Certs.</li>
+<li>Configure <code>clab.topo.yaml</code> to do the needed fabric and create interfaces in
+the <code>ext-containers</code> of kind, as well as the need host level networking.</li>
+<li>Start the clab <code>sudo containerlab -t topo.clab.yaml deploy &amp;</code>.</li>
+<li>Start the kind cluster creation <code>kind create cluster -v 1 --config cluster.yaml</code>.</li>
+<li>Once ready remove <code>eth0</code>, fix DNS namespace to all k8s/kind nodes.</li>
+<li>Sed the <code>.kube/config</code> to replace the <code>localhost:port</code> to the desired API IP.</li>
+</ol>
+<p>The important node is that step 2,3 must be in parallel, because clab is waiting for containers
+to be created, and kind/kubeadm process is waiting for networking to be working to proceed.</p>
+<h1 id="setup">Setup</h1>
+<p>Here is the <code>cluster.yaml</code> file, we pick IP <code>10.10.10.0/24</code> for the nodes:</p>
+<pre tabindex="0"><code>---
+apiVersion: kind.x-k8s.io/v1alpha4
+kind: Cluster
+name: k8s
+networking:
+  ipFamily: dual
+  disableDefaultCNI: false
+  podSubnet: &#34;10.1.0.0/16,fd00:10:1::/63&#34;
+  serviceSubnet: &#34;10.2.0.0/16,fd00:10:2::/108&#34;
+nodes:
+  - role: control-plane
+    kubeadmConfigPatches:
+      - |
+        kind: ClusterConfiguration
+        controlPlaneEndpoint: &#34;10.10.10.102:6443&#34;
+        apiServer:
+          certSANs: [localhost, &#34;127.0.0.1&#34;,&#34;10.10.10.102&#34;]
+      - |
+        kind: JoinConfiguration
+        controlPlane:
+          localAPIEndpoint:
+            advertiseAddress: &#34;10.10.10.102&#34;
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-ip: 10.10.10.102, fd00:10:10::102
+      - |
+        kind: InitConfiguration
+        localAPIEndpoint:
+          advertiseAddress: &#34;10.10.10.102&#34;
+          bindPort: 6443
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-ip: &#34;10.10.10.102,fd00:10:10:10::102&#34;
+  - role: worker
+    labels:
+      metallb-speaker: &#34;&#34;
+    kubeadmConfigPatches:
+      - |
+        kind: ClusterConfiguration
+        controlPlaneEndpoint: &#34;10.10.10.102:6443&#34;
+        apiServer:
+          certSANs: [localhost, &#34;127.0.0.1&#34;,&#34;10.10.10.102&#34;]
+      - |
+        kind: JoinConfiguration
+        discovery:
+          bootstrapToken:
+            apiServerEndpoint: 10.10.10.102:6443
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-ip: &#34;10.10.10.103,fd00:10:10:10::103&#34;
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-ip: &#34;10.10.10.103,fd00:10:10:10::103&#34;
+</code></pre><p>The <code>topo.clab.yaml</code> should be tailored to the desired networking testing.
+It should make sure that:</p>
+<ol>
+<li>K8s/kind nodes are connected in a way that the CNI will become healthy. E.g.
+when using kindnet all nodes should be in the same L3 network.</li>
+<li>Networking configuration (routing/iptables) inside the containers namespace
+and in the host network is providing internet access and local API access.</li>
+</ol>
+<p>Example topology file</p>
+<pre tabindex="0"><code>---
+name: vlab
+mgmt:
+  network: mgmtnet
+  ipv4-subnet: 172.100.100.0/24
+  ipv6-subnet: &#39;&#39;
+
+topology:
+  nodes:
+    host-network:
+      kind: linux
+      image: quay.io/karampok/snife:latest
+      network-mode: host
+      exec:
+        - ip addr add 169.254.10.9/30 dev clab
+        - ip route add 10.10.10.0/24 via 169.254.10.10
+        - iptables -t nat -I POSTROUTING -o bond0 --source 10.10.10.0/24 -j MASQUERADE
+        # bond0 = $(ip -json route get 8.8.8.8 | jq -r .[0].dev)
+        # iptables -P FORWARD ACCEPT
+        # check firewalls do not block traffic
+    tor1:
+      kind: linux
+      image: quay.io/frrouting/frr:9.0.2
+      network-mode: none
+      binds:
+        - conf/tor0/daemons:/etc/frr/daemons
+        - conf/tor0/frr.conf:/etc/frr/frr.conf
+        - conf/tor0/vtysh.conf:/etc/frr/vtysh.conf
+      exec:
+        - ip link set dev eth01 address 10:00:00:00:00:01
+        - ip link set dev eth02 address 10:00:00:00:00:02
+        - ip link set dev eth01 up
+        - ip link set dev eth02 up
+        - ip link add name br0 type bridge
+        - ip link set dev br0 address 10:00:00:00:00:10
+        - ip link set eth01 master br0
+        - ip link set eth02 master br0
+        - ip addr add 10.10.10.10/24 dev br0
+        - ip addr add fd00:10:10:10::10/64 dev br0
+        - ip link set dev br0 up
+        - ip addr add 169.254.10.10/30 dev upstream
+        - ip route add default via 169.254.10.9 src 10.10.10.10
+        # more stuff like vlans/vrfs
+        # - ip link add link eth01 name eth01.green type vlan id 11
+        # - ip link add link eth01 name eth01.red type vlan id 12
+        # - ip link add red type vrf table 120
+        # - ip link set eth01.red master red
+        # - ip addr add 10.10.10.20/24 dev eth02.blue
+        # - ip addr add fd00:10:10:10::20/64 dev eth02.blue
+        # - ip link add link eth02 name eth02.red type vlan id 12
+        # - ip link add red type vrf table 120
+        # - ip link set eth02.red master red
+        # - ip link set dev red up
+    k8s-control-plane:
+      kind: ext-container
+      network-mode: none
+      exec:
+        - ip link set dev net0 address de:ad:be:ff:11:01
+        - ip addr add dev net0 10.10.10.102/24
+        - ip addr add dev net0 fd00:10:10:10::102/64
+        - ip link set dev net0 up
+        - ip link add link net0 name green type vlan id 11
+        - ip link set dev green up
+        - ip link add link net0 name red type vlan id 12
+        - ip link set dev red up
+        - ip route delete default
+        - ip route add default via 10.10.10.10
+    k8s-worker:
+      kind: ext-container
+      network-mode: none
+      exec:
+        - ip link set dev net0 address de:ad:be:ff:11:02
+        - ip addr add dev net0 10.10.10.103/24
+        - ip addr add dev net0 fd00:10:10:10::103/64
+        - ip link set dev net0 up
+        - ip link add link net0 name green type vlan id 11
+        - ip link set dev green up
+        - ip link add link net0 name red type vlan id 12
+        - ip link set dev red up
+        - ip route delete default
+        - ip route add default via 10.10.10.10
+  links:
+    - endpoints: [&#34;tor1:eth01&#34;, &#34;k8s-control-plane:net0&#34;]
+    - endpoints: [&#34;tor1:eth02&#34;, &#34;k8s-worker:net0&#34;]
+    - endpoints: [&#34;tor1:upstream&#34;, &#34;host-network:clab&#34;]
+</code></pre><p>The rest which is remove <code>eth0</code> , fix DNS and restore local k8s API access.</p>
+<pre tabindex="0"><code>for node in $(kind get nodes --name k8s); do \
+        docker network disconnect kind $node; \
+        docker exec $node /bin/bash -c &#34; echo &#39;nameserver 8.8.8.8&#39; &gt; /etc/resolv.conf&#34;; \
+done
+sed -i &#39;s|server: https://127.0.0.1:[0-9]*|server: https://10.10.10.102:6443|&#39; ~/.kube/config
+</code></pre><h1 id="run">Run</h1>
+<pre tabindex="0"><code>sudo containerlab -t topo.clab.yaml deploy &amp;
+kind create cluster -v 1 --config cluster.yaml
+Creating cluster &#34;k8s&#34; ...
+DEBUG: docker/images.go:58] Image: kindest/node:v1.29.2@sha256:51a1434a5397193442f0be2a297b488b6c919ce8a3931be0ce822606ea5ca245 present locally
+ ✓ Ensuring node image (kindest/node:v1.29.2) 🖼
+INFO[0000] Containerlab v0.57.3 started
+INFO[0000] Parsing &amp; checking topology file: topo.clab.yaml
+INFO[0000] Creating docker network: Name=&#34;mgmtnet&#34;, IPv4Subnet=&#34;172.100.100.0/24&#34;, IPv6Subnet=&#34;&#34;, MTU=0
+⠈⠁ Preparing nodes 📦 📦  INFO[0000] Creating lab directory: /home/kka/workspace/github.com/metallb/clab/dev-env/clab/clab-vlab
+⠈⠱ Preparing nodes 📦 📦  INFO[0000] Creating container: &#34;host-network&#34;
+INFO[0000] Creating container: &#34;tor1&#34;
+⢄⡱ Preparing nodes 📦 📦  INFO[0000] failed to disable TX checksum offload for eth0 interface for host-network container
+⢎⡰ Preparing nodes 📦 📦  INFO[0001] Created link: tor1:upstream &lt;--&gt; host-network:clab
+INFO[0001] failed to disable TX checksum offload for eth0 interface for tor1 container
+ ✓ Preparing nodes 📦 📦
+INFO[0003] Created link: tor1:eth02 &lt;--&gt; k8s-worker:net0
+INFO[0003] Created link: tor1:eth01 &lt;--&gt; k8s-control-plane:net0
+ ✓ Writing configuration 📜
+⠈⠁ Starting control-plane 🕹️  INFO[0003] Executed command &#34;ip addr add 169.254.10.9/30 dev clab&#34; on the node &#34;host-network&#34;. stdout:
+INFO[0003] Executed command &#34;ip route add 10.10.10.0/24 via 169.254.10.10&#34; on the node &#34;host-network&#34;. stdout:
+INFO[0003] Executed command &#34;iptables -t nat -I POSTROUTING -o bond0 --source 10.10.10.0/24 -j MASQUERADE&#34; on the node &#34;host-network&#34;. stdout:
+INFO[0003] Executed command &#34;iptables -P FORWARD ACCEPT&#34; on the node &#34;host-network&#34;. stdout:
+INFO[0003] Executed command &#34;ip link set dev eth01 address 10:00:00:00:00:01&#34; on the node &#34;tor1&#34;. stdout:
+INFO[0003] Executed command &#34;ip link set dev eth02 address 10:00:00:00:00:02&#34; on the node &#34;tor1&#34;. stdout:
+INFO[0003] Executed command &#34;ip link set dev eth01 up&#34; on the node &#34;tor1&#34;. stdout:
+INFO[0003] Executed command &#34;ip link set dev eth02 up&#34; on the node &#34;tor1&#34;. stdout:
+INFO[0003] Executed command &#34;ip link add name br0 type bridge&#34; on the node &#34;tor1&#34;. stdout:
+INFO[0003] Executed command &#34;ip link set dev br0 address 10:00:00:00:00:10&#34; on the node &#34;tor1&#34;. stdout:
+INFO[0003] Executed command &#34;ip link set eth01 master br0&#34; on the node &#34;tor1&#34;. stdout:
+INFO[0003] Executed command &#34;ip link set eth02 master br0&#34; on the node &#34;tor1&#34;. stdout:
+INFO[0003] Executed command &#34;ip addr add 10.10.10.10/24 dev br0&#34; on the node &#34;tor1&#34;. stdout:
+INFO[0003] Executed command &#34;ip addr add fd00:10:10:10::10/64 dev br0&#34; on the node &#34;tor1&#34;. stdout:
+INFO[0003] Executed command &#34;ip link set dev br0 up&#34; on the node &#34;tor1&#34;. stdout:
+INFO[0003] Executed command &#34;ip addr add 169.254.10.10/30 dev upstream&#34; on the node &#34;tor1&#34;. stdout:
+INFO[0003] Executed command &#34;ip link add veth0 type veth peer name veth1&#34; on the node &#34;tor1&#34;. stdout:
+INFO[0003] Executed command &#34;ip link set veth0 master br0&#34; on the node &#34;tor1&#34;. stdout:
+INFO[0003] Executed command &#34;ip link set veth0 up&#34; on the node &#34;tor1&#34;. stdout:
+INFO[0003] Executed command &#34;ip link set veth1 up&#34; on the node &#34;tor1&#34;. stdout:
+INFO[0003] Executed command &#34;ip link set dev veth1 address 10:00:00:00:00:00&#34; on the node &#34;tor1&#34;. stdout:
+INFO[0003] Executed command &#34;ip route add default via 169.254.10.9 src 10.10.10.10&#34; on the node &#34;tor1&#34;. stdout:
+INFO[0003] Executed command &#34;ip link set dev net0 address de:ad:be:ff:11:02&#34; on the node &#34;k8s-worker&#34;. stdout:
+INFO[0003] Executed command &#34;ip addr add dev net0 10.10.10.103/24&#34; on the node &#34;k8s-worker&#34;. stdout:
+INFO[0003] Executed command &#34;ip addr add dev net0 fd00:10:10:10::103/64&#34; on the node &#34;k8s-worker&#34;. stdout:
+INFO[0003] Executed command &#34;ip link set dev net0 up&#34; on the node &#34;k8s-worker&#34;. stdout:
+INFO[0003] Executed command &#34;ip link add link net0 name green type vlan id 11&#34; on the node &#34;k8s-worker&#34;. stdout:
+INFO[0003] Executed command &#34;ip link set dev green up&#34; on the node &#34;k8s-worker&#34;. stdout:
+INFO[0003] Executed command &#34;ip link add link net0 name red type vlan id 12&#34; on the node &#34;k8s-worker&#34;. stdout:
+INFO[0003] Executed command &#34;ip link set dev red up&#34; on the node &#34;k8s-worker&#34;. stdout:
+INFO[0003] Executed command &#34;ip route delete default&#34; on the node &#34;k8s-worker&#34;. stdout:
+INFO[0003] Executed command &#34;ip route add default via 10.10.10.10&#34; on the node &#34;k8s-worker&#34;. stdout:
+INFO[0003] Executed command &#34;ip link set dev net0 address de:ad:be:ff:11:01&#34; on the node &#34;k8s-control-plane&#34;. stdout:
+INFO[0003] Executed command &#34;ip addr add dev net0 10.10.10.102/24&#34; on the node &#34;k8s-control-plane&#34;. stdout:
+INFO[0003] Executed command &#34;ip addr add dev net0 fd00:10:10:10::102/64&#34; on the node &#34;k8s-control-plane&#34;. stdout:
+INFO[0003] Executed command &#34;ip link set dev net0 up&#34; on the node &#34;k8s-control-plane&#34;. stdout:
+INFO[0003] Executed command &#34;ip link add link net0 name green type vlan id 11&#34; on the node &#34;k8s-control-plane&#34;. stdout:
+INFO[0003] Executed command &#34;ip link set dev green up&#34; on the node &#34;k8s-control-plane&#34;. stdout:
+INFO[0003] Executed command &#34;ip link add link net0 name red type vlan id 12&#34; on the node &#34;k8s-control-plane&#34;. stdout:
+INFO[0003] Executed command &#34;ip link set dev red up&#34; on the node &#34;k8s-control-plane&#34;. stdout:
+INFO[0003] Executed command &#34;ip route delete default&#34; on the node &#34;k8s-control-plane&#34;. stdout:
+INFO[0003] Executed command &#34;ip route add default via 10.10.10.10&#34; on the node &#34;k8s-control-plane&#34;. stdout:
+INFO[0003] Adding containerlab host entries to /etc/hosts file
+INFO[0003] Adding ssh config for containerlab nodes
++---+------------------------+--------------+----------------------------------------------------------------------------------------------+---------------+---------+----------------+----------------------+
+| # |          Name          | Container ID |                                            Image                                             |     Kind      |  State  |  IPv4 Address  |     IPv6 Address     |
++---+------------------------+--------------+----------------------------------------------------------------------------------------------+---------------+---------+----------------+----------------------+
+| 1 | k8s-control-plane      | 6cf7edcb38e6 | kindest/node:v1.29.2@sha256:51a1434a5397193442f0be2a297b488b6c919ce8a3931be0ce822606ea5ca245 | ext-container | running | 172.20.20.3/24 | 2001:172:20:20::3/64 |
+| 2 | k8s-worker             | a2ecdf963f76 | kindest/node:v1.29.2@sha256:51a1434a5397193442f0be2a297b488b6c919ce8a3931be0ce822606ea5ca245 | ext-container | running | 172.20.20.2/24 | 2001:172:20:20::2/64 |
+| 3 | clab-vlab-host-network | a6a72db33668 | quay.io/karampok/snife:latest                                                                | linux         | running | N/A            | N/A                  |
+| 4 | clab-vlab-tor1         | 3ace245e590e | quay.io/frrouting/frr:9.0.2                                                                  | linux         | running | N/A            | N/A                  |
++---+------------------------+--------------+----------------------------------------------------------------------------------------------+---------------+---------+----------------+----------------------+
+ ✓ Starting control-plane 🕹️ 
+ ✓ Installing CNI 🔌
+ ✓ Installing StorageClass 💾
+ ✓ Joining worker nodes 🚜
+Set kubectl context to &#34;kind-k8s&#34;
+You can now use your cluster with:
+
+kubectl cluster-info --context kind-k8s
+
+Not sure what to do next? 😅  Check out https://kind.sigs.k8s.io/docs/user/quick-start/
+sed -i &#39;s|server: https://127.0.0.1:[0-9]*|server: https://10.10.10.102:6443|&#39; ~/.kube/config
+[I] kka@f-t14s ~/w/g/m/c/d/clab (clab↑1 ✔)&gt; k get nodes -o wide
+NAME                STATUS   ROLES           AGE   VERSION   INTERNAL-IP    EXTERNAL-IP   OS-IMAGE                         KERNEL-VERSION            CONTAINER-RUNTIME
+k8s-control-plane   Ready    control-plane   22m   v1.29.2   10.10.10.102   &lt;none&gt;        Debian GNU/Linux 12 (bookworm)   6.10.10-200.fc40.x86_64   containerd://1.7.13
+k8s-worker          Ready    &lt;none&gt;          21m   v1.29.2   10.10.10.103   &lt;none&gt;        Debian GNU/Linux 12 (bookworm)   6.10.10-200.fc40.x86_64   containerd://1.7.13
+[I] kka@f-t14s ~/w/g/m/c/d/clab (clab↑1 ✔)&gt; k get pods -A
+NAMESPACE            NAME                                        READY   STATUS    RESTARTS      AGE
+kube-system          coredns-76f75df574-fqxlh                    1/1     Running   0             22m
+kube-system          coredns-76f75df574-gnhp2                    1/1     Running   0             22m
+kube-system          etcd-k8s-control-plane                      1/1     Running   0             22m
+kube-system          kindnet-b7vr6                               1/1     Running   1 (20m ago)   22m
+kube-system          kindnet-wnkmg                               1/1     Running   0             21m
+kube-system          kube-apiserver-k8s-control-plane            1/1     Running   0             22m
+kube-system          kube-controller-manager-k8s-control-plane   1/1     Running   0             22m
+kube-system          kube-proxy-9bdvf                            1/1     Running   0             21m
+kube-system          kube-proxy-srj5s                            1/1     Running   0             22m
+kube-system          kube-scheduler-k8s-control-plane            1/1     Running   0             22m
+local-path-storage   local-path-provisioner-7577fdbbfb-f4mjw     1/1     Running   0             22m
+</code></pre><h1 id="network-explained">Network explained</h1>
+<p><img alt="clab-graph " src="/images/clab-graph.png"></p>
+<p>The working tcpdump (taken over all relevant network namespaces) show
+the packet path.</p>
+<h2 id="k8s-node-to-internet">K8s Node to internet</h2>
+<pre tabindex="0"><code># K8s Node
+net0  Out IP 10.10.10.102 &gt; 8.8.8.8: ICMP echo request, id 13, seq 1, length 64
+# Router from CLAB
+eth01 P   IP 10.10.10.102 &gt; 8.8.8.8: ICMP echo request, id 13, seq 1, length 64
+br0   In  IP 10.10.10.102 &gt; 8.8.8.8: ICMP echo request, id 13, seq 1, length 64
+upstream Out IP 10.10.10.102 &gt; 8.8.8.8: ICMP echo request, id 13, seq 1, length 64
+# Host network
+clab  In  IP 10.10.10.102 &gt; 8.8.8.8: ICMP echo request, id 13, seq 1, length 64
+bond0 Out IP 192.168.149.212 &gt; 8.8.8.8: ICMP echo request, id 13, seq 1, length 64
+
+wlp0s20f3 In  IP 8.8.8.8 &gt; 192.168.149.212: ICMP echo reply, id 13, seq 1, length 64
+clab  Out IP 8.8.8.8 &gt; 10.10.10.102: ICMP echo reply, id 13, seq 1, length 64
+upstream In  IP 8.8.8.8 &gt; 10.10.10.102: ICMP echo reply, id 13, seq 1, length 64
+br0   Out IP 8.8.8.8 &gt; 10.10.10.102: ICMP echo reply, id 13, seq 1, length 64
+eth01 Out IP 8.8.8.8 &gt; 10.10.10.102: ICMP echo reply, id 13, seq 1, length 64
+net0  In  IP 8.8.8.8 &gt; 10.10.10.102: ICMP echo reply, id 13, seq 1, length 64
+</code></pre><h2 id="local-k8s-api-access">Local k8s API access</h2>
+<p>Now, the traffic does not use expose port from docker to localhost, but the
+network path is through the interface that connects host-network and clab-router.</p>
+<pre tabindex="0"><code># K8s Node
+net0  Out IP 10.10.10.102 &gt; 8.8.8.8: ICMP echo request, id 13, seq 1, length 64
+# Router from CLAB
+eth01 P   IP 10.10.10.102 &gt; 8.8.8.8: ICMP echo request, id 13, seq 1, length 64
+br0   In  IP 10.10.10.102 &gt; 8.8.8.8: ICMP echo request, id 13, seq 1, length 64
+upstream Out IP 10.10.10.102 &gt; 8.8.8.8: ICMP echo request, id 13, seq 1, length 64
+# Host network
+clab  In  IP 10.10.10.102 &gt; 8.8.8.8: ICMP echo request, id 13, seq 1, length 64
+bond0 Out IP 192.168.149.212 &gt; 8.8.8.8: ICMP echo request, id 13, seq 1, length 64
+
+wlp0s20f3 In  IP 8.8.8.8 &gt; 192.168.149.212: ICMP echo reply, id 13, seq 1, length 64
+clab  Out IP 8.8.8.8 &gt; 10.10.10.102: ICMP echo reply, id 13, seq 1, length 64
+upstream In  IP 8.8.8.8 &gt; 10.10.10.102: ICMP echo reply, id 13, seq 1, length 64
+br0   Out IP 8.8.8.8 &gt; 10.10.10.102: ICMP echo reply, id 13, seq 1, length 64
+eth01 Out IP 8.8.8.8 &gt; 10.10.10.102: ICMP echo reply, id 13, seq 1, length 64
+net0  In  IP 8.8.8.8 &gt; 10.10.10.102: ICMP echo reply, id 13, seq 1, length 64
+</code></pre><pre tabindex="0"><code>clab  Out IP 169.254.10.9.52556 &gt; 10.10.10.102.6443: Flags [S], seq 4290152719, win 56760, options [mss 9460,sackOK,TS val 2001072867 ecr 0,nop,wscale 7], length 0
+upstream In  IP 169.254.10.9.52556 &gt; 10.10.10.102.6443: Flags [S], seq 4290152719, win 56760, options [mss 9460,sackOK,TS val 2001072867 ecr 0,nop,wscale 7], length 0
+br0   Out IP 169.254.10.9.52556 &gt; 10.10.10.102.6443: Flags [S], seq 4290152719, win 56760, options [mss 9460,sackOK,TS val 2001072867 ecr 0,nop,wscale 7], length 0
+eth01 Out IP 169.254.10.9.52556 &gt; 10.10.10.102.6443: Flags [S], seq 4290152719, win 56760, options [mss 9460,sackOK,TS val 2001072867 ecr 0,nop,wscale 7], length 0
+net0  In  IP 169.254.10.9.52556 &gt; 10.10.10.102.6443: Flags [S], seq 4290152719, win 56760, options [mss 9460,sackOK,TS val 2001072867 ecr 0,nop,wscale 7], length 0
+</code></pre>
+</div>
+
+  
+<footer class='entry-footer'>
+  <div class='container sep-before'><div class='tags'><svg
+  class="icon"
+  xmlns="http://www.w3.org/2000/svg"
+  viewbox="0 0 24 24"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  stroke-width="2"
+  aria-hidden="true"
+><path d="M20.59,13.41l-7.17,7.17a2,2,0,0,1-2.83,0L2,12V2H12l8.59,8.59A2,2,0,0,1,20.59,13.41Z" />
+<line x1="7" y1="7" x2="7" y2="7" />
+</svg>
+<span class='screen-reader-text'>Tags: </span><a class='tag' href='/tags/container-networking/'>Container-Networking</a>, <a class='tag' href='/tags/cni/'>CNI</a>, <a class='tag' href='/tags/kubernetes/'>Kubernetes</a>, <a class='tag' href='/tags/containerlab/'>Containerlab</a></div>
+
+  </div>
+</footer>
+
+
+</article>
+
+<nav class='entry-nav'>
+  <div class='container'><div class='prev-entry sep-before'>
+      <a href='/posts/chained-plugins-cni/'>
+        <span aria-hidden='true'><svg
+  class="icon"
+  xmlns="http://www.w3.org/2000/svg"
+  viewbox="0 0 24 24"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  stroke-width="2"
+  aria-hidden="true"
+><line x1="20" y1="12" x2="4" y2="12" />
+<polyline points="10 18 4 12 10 6" />
+</svg>
+ Previous</span>
+        <span class='screen-reader-text'>Previous post: </span>Chaining CNI Plugins</a>
+    </div></div>
+</nav>
+
+
+
+
+      </main>
+
+      <footer id='footer' class='footer'>
+        <div class='container sep-before'><section class='widget widget-social_menu sep-after'><nav aria-label='Social Menu'>
+    <ul><li>
+        <a href='https://github.com/karampok' target='_blank' rel='noopener me'>
+          <span class='screen-reader-text'>Open Github account in new tab</span><svg
+  class="icon"
+  xmlns="http://www.w3.org/2000/svg"
+  viewbox="0 0 24 24"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  stroke-width="2"
+  aria-hidden="true"
+><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+</svg>
+</a>
+      </li><li>
+        <a href='https://twitter.com/karampok' target='_blank' rel='noopener me'>
+          <span class='screen-reader-text'>Open Twitter account in new tab</span><svg
+  class="icon"
+  xmlns="http://www.w3.org/2000/svg"
+  viewbox="0 0 24 24"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  stroke-width="2"
+  aria-hidden="true"
+><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
+</svg>
+</a>
+      </li><li>
+        <a href='mailto:karampok&#43;site@gmail.com' target='_blank' rel='noopener me'>
+          <span class='screen-reader-text'>Contact via Email</span><svg
+  class="icon"
+  xmlns="http://www.w3.org/2000/svg"
+  viewbox="0 0 24 24"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  stroke-width="2"
+  aria-hidden="true"
+><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+<polyline points="22,6 12,13 2,6" />
+</svg>
+</a>
+      </li><li>
+        <a href='https://linkedin.com/in/kkarampogias' target='_blank' rel='noopener me'>
+          <span class='screen-reader-text'>Open Linkedin account in new tab</span><svg
+  class="icon"
+  xmlns="http://www.w3.org/2000/svg"
+  viewbox="0 0 24 24"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  stroke-width="2"
+  aria-hidden="true"
+><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+<rect x="2" y="9" width="4" height="12" />
+<circle cx="4" cy="4" r="2" />
+</svg>
+</a>
+      </li></ul>
+  </nav>
+</section><div class='copyright'>
+  <p> &copy; 2018-2024 karampok </p>
+</div>
+
+        </div>
+      </footer>
+
+    </div>
+  </div><script>window.__assets_js_src="/assets/js/"</script>
+
+<script src='/assets/js/main.c3bcf2df.js'></script><script src='/js/custom.js'></script>
+
+</body>
+
+</html>
+

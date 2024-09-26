@@ -9,13 +9,6 @@
     <lastBuildDate>Thu, 26 Sep 2024 09:04:06 +0200</lastBuildDate>
     <atom:link href="http://www.karampok.me/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>CNI</title>
-      <link>http://www.karampok.me/tags/cni/</link>
-      <pubDate>Thu, 26 Sep 2024 09:04:06 +0200</pubDate>
-      <guid>http://www.karampok.me/tags/cni/</guid>
-      <description></description>
-    </item>
-    <item>
       <title>Container-Networking</title>
       <link>http://www.karampok.me/tags/container-networking/</link>
       <pubDate>Thu, 26 Sep 2024 09:04:06 +0200</pubDate>
@@ -30,9 +23,23 @@
       <description></description>
     </item>
     <item>
+      <title>Kind</title>
+      <link>http://www.karampok.me/tags/kind/</link>
+      <pubDate>Thu, 26 Sep 2024 09:04:06 +0200</pubDate>
+      <guid>http://www.karampok.me/tags/kind/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>CNI</title>
+      <link>http://www.karampok.me/tags/cni/</link>
+      <pubDate>Sun, 11 Feb 2018 21:06:48 +0100</pubDate>
+      <guid>http://www.karampok.me/tags/cni/</guid>
+      <description></description>
+    </item>
+    <item>
       <title>Kubernetes</title>
       <link>http://www.karampok.me/tags/kubernetes/</link>
-      <pubDate>Thu, 26 Sep 2024 09:04:06 +0200</pubDate>
+      <pubDate>Sun, 11 Feb 2018 21:06:48 +0100</pubDate>
       <guid>http://www.karampok.me/tags/kubernetes/</guid>
       <description></description>
     </item>

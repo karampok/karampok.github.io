@@ -6,15 +6,8 @@
     <description>Recent content in CNI on Konstantinos Karampogias</description>
     <generator>Hugo</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 26 Sep 2024 09:04:06 +0200</lastBuildDate>
+    <lastBuildDate>Sun, 11 Feb 2018 21:06:48 +0100</lastBuildDate>
     <atom:link href="http://www.karampok.me/tags/cni/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Kind k8s cluster w/ containerlab w/o docker network</title>
-      <link>http://www.karampok.me/posts/kind-containerlab/</link>
-      <pubDate>Thu, 26 Sep 2024 09:04:06 +0200</pubDate>
-      <guid>http://www.karampok.me/posts/kind-containerlab/</guid>
-      <description>&lt;h1 id=&#34;why&#34;&gt;Why&lt;/h1&gt;&#xA;&lt;p&gt;Using kind to spin up fast k8s clusters is great, but when it comes down&#xA;to networking part e.g. multiple interfaces on the nodes or connect nodes to&#xA;a complex network fabric, kind is limited. Containerlab on the other side make&#xA;the build of network fabric easy. Containerlab and kind do work together&#xA;&lt;a href=&#34;https://containerlab.dev/manual/kinds/k8s-kind/&#34;&gt;link&lt;/a&gt; but AFAICT it works using a secondary&#xA;interface on the node, while the primary (=default routing) should remain to provide&#xA;API access and internet connectivity.&lt;/p&gt;</description>
-    </item>
     <item>
       <title>Chaining CNI Plugins</title>
       <link>http://www.karampok.me/posts/chained-plugins-cni/</link>

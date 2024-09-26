@@ -494,6 +494,8 @@ local-path-storage   local-path-provisioner-7577fdbbfb-f4mjw     1/1     Running
 <p>The working tcpdump (taken over all relevant network namespaces) show
 the packet path.</p>
 <h2 id="k8s-node-to-internet">K8s Node to internet</h2>
+<p>Host-network is responsible to forward and MASQUERADE and route back the
+traffic.</p>
 <pre tabindex="0"><code># K8s Node
 net0  Out IP 10.10.10.102 &gt; 8.8.8.8: ICMP echo request, id 13, seq 1, length 64
 # Router from CLAB
@@ -513,23 +515,7 @@ net0  In  IP 8.8.8.8 &gt; 10.10.10.102: ICMP echo reply, id 13, seq 1, length 64
 </code></pre><h2 id="local-k8s-api-access">Local k8s API access</h2>
 <p>Now, the traffic does not use expose port from docker to localhost, but the
 network path is through the interface that connects host-network and clab-router.</p>
-<pre tabindex="0"><code># K8s Node
-net0  Out IP 10.10.10.102 &gt; 8.8.8.8: ICMP echo request, id 13, seq 1, length 64
-# Router from CLAB
-eth01 P   IP 10.10.10.102 &gt; 8.8.8.8: ICMP echo request, id 13, seq 1, length 64
-br0   In  IP 10.10.10.102 &gt; 8.8.8.8: ICMP echo request, id 13, seq 1, length 64
-upstream Out IP 10.10.10.102 &gt; 8.8.8.8: ICMP echo request, id 13, seq 1, length 64
-# Host network
-clab  In  IP 10.10.10.102 &gt; 8.8.8.8: ICMP echo request, id 13, seq 1, length 64
-bond0 Out IP 192.168.149.212 &gt; 8.8.8.8: ICMP echo request, id 13, seq 1, length 64
-
-wlp0s20f3 In  IP 8.8.8.8 &gt; 192.168.149.212: ICMP echo reply, id 13, seq 1, length 64
-clab  Out IP 8.8.8.8 &gt; 10.10.10.102: ICMP echo reply, id 13, seq 1, length 64
-upstream In  IP 8.8.8.8 &gt; 10.10.10.102: ICMP echo reply, id 13, seq 1, length 64
-br0   Out IP 8.8.8.8 &gt; 10.10.10.102: ICMP echo reply, id 13, seq 1, length 64
-eth01 Out IP 8.8.8.8 &gt; 10.10.10.102: ICMP echo reply, id 13, seq 1, length 64
-net0  In  IP 8.8.8.8 &gt; 10.10.10.102: ICMP echo reply, id 13, seq 1, length 64
-</code></pre><pre tabindex="0"><code>clab  Out IP 169.254.10.9.52556 &gt; 10.10.10.102.6443: Flags [S], seq 4290152719, win 56760, options [mss 9460,sackOK,TS val 2001072867 ecr 0,nop,wscale 7], length 0
+<pre tabindex="0"><code>clab  Out IP 169.254.10.9.52556 &gt; 10.10.10.102.6443: Flags [S], seq 4290152719, win 56760, options [mss 9460,sackOK,TS val 2001072867 ecr 0,nop,wscale 7], length 0
 upstream In  IP 169.254.10.9.52556 &gt; 10.10.10.102.6443: Flags [S], seq 4290152719, win 56760, options [mss 9460,sackOK,TS val 2001072867 ecr 0,nop,wscale 7], length 0
 br0   Out IP 169.254.10.9.52556 &gt; 10.10.10.102.6443: Flags [S], seq 4290152719, win 56760, options [mss 9460,sackOK,TS val 2001072867 ecr 0,nop,wscale 7], length 0
 eth01 Out IP 169.254.10.9.52556 &gt; 10.10.10.102.6443: Flags [S], seq 4290152719, win 56760, options [mss 9460,sackOK,TS val 2001072867 ecr 0,nop,wscale 7], length 0

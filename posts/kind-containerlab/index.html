@@ -222,7 +222,7 @@ the build of network fabric easy. Containerlab and kind do work
 interface on the node, while the primary (=default routing) should remain to provide
 API access and internet connectivity.</p>
 <h1 id="how-to-to-drop-the-docker-network">How to to drop the docker network</h1>
-<p>This is to remove the <code>eth0</code> interface from all k8s nodes and keep the cluster healthy
+<p>This means in practise to remove the <code>eth0</code> interface from all k8s nodes and keep the cluster healthy
 and connected.</p>
 <ol>
 <li>Configure <code>cluster.yaml</code> kind configuration to patch kubeadm and replace the node IPs/Certs.</li>
@@ -233,7 +233,7 @@ the <code>ext-containers</code> of kind, as well as the need host level networki
 <li>Once ready remove <code>eth0</code>, fix DNS namespace to all k8s/kind nodes.</li>
 <li>Sed the <code>.kube/config</code> to replace the <code>localhost:port</code> to the desired API IP.</li>
 </ol>
-<p>The important node is that step 2,3 must be in parallel, because clab is waiting for containers
+<p>The important note is that step 2,3 must be in parallel, because clab is waiting for containers
 to be created, and kind/kubeadm process is waiting for networking to be working to proceed.</p>
 <h1 id="setup">Setup</h1>
 <p>Here is the <code>cluster.yaml</code> file, we pick IP <code>10.10.10.0/24</code> for the nodes:</p>

@@ -228,7 +228,7 @@ and connected.</p>
 <li>Configure <code>cluster.yaml</code> kind configuration to patch kubeadm and replace the node IPs/Certs.</li>
 <li>Configure <code>clab.topo.yaml</code> to do the needed fabric and create interfaces in
 the <code>ext-containers</code> of kind, as well as the need host level networking.</li>
-<li>Start the clab <code>sudo containerlab -t topo.clab.yaml deploy &amp;</code>.</li>
+<li>Start the clab in the background <code>sudo containerlab -t topo.clab.yaml deploy &amp;</code>.</li>
 <li>Start the kind cluster creation <code>kind create cluster -v 1 --config cluster.yaml</code>.</li>
 <li>Once ready remove <code>eth0</code>, fix DNS namespace to all k8s/kind nodes.</li>
 <li>Sed the <code>.kube/config</code> to replace the <code>localhost:port</code> to the desired API IP.</li>
@@ -493,9 +493,29 @@ kube-system          kube-scheduler-k8s-control-plane            1/1     Running
 local-path-storage   local-path-provisioner-7577fdbbfb-f4mjw     1/1     Running   0             22m
 </code></pre><h1 id="network-explained">Network explained</h1>
 <p><img alt="clab-graph " src="/images/clab-graph.png"></p>
-<p>The working tcpdump (taken over all relevant network namespaces) show
+<pre tabindex="0"><code>docker exec -it k8s-control-plane /bin/bash
+root@k8s-control-plane:/# ip --br a s
+lo               UNKNOWN        127.0.0.1/8 ::1/128
+...
+net0@if835       UP             10.10.10.102/24 fd00:10:10:10::102/64 fe80::a8c1:abff:fe5e:c6a4/64
+root@k8s-control-plane:/# ip route
+default via 10.10.10.10 dev net0
+...
+10.10.10.0/24 dev net0 proto kernel scope link src 10.10.10.102
+</code></pre><p>The working tcpdump (taken over all relevant network namespaces) show
 the packet path.</p>
-<h2 id="k8s-node-to-internet">K8s Node to internet</h2>
+<h1 id="node-to-node">Node to Node</h1>
+<p>That traffic is going through the switching (bridge) part of the router</p>
+<pre tabindex="0"><code>net0  Out IP 10.10.10.102 &gt; 10.10.10.103: ICMP echo request, id 15, seq 1, length 64
+eth01 P   IP 10.10.10.102 &gt; 10.10.10.103: ICMP echo request, id 15, seq 1, length 64
+eth02 Out IP 10.10.10.102 &gt; 10.10.10.103: ICMP echo request, id 15, seq 1, length 64
+net0  In  IP 10.10.10.102 &gt; 10.10.10.103: ICMP echo request, id 16, seq 1, length 64
+
+net0  Out IP 10.10.10.103 &gt; 10.10.10.102: ICMP echo reply, id 16, seq 1, length 64
+eth02 P   IP 10.10.10.103 &gt; 10.10.10.102: ICMP echo reply, id 15, seq 1, length 64
+eth01 Out IP 10.10.10.103 &gt; 10.10.10.102: ICMP echo reply, id 15, seq 1, length 64
+net0  In  IP 10.10.10.103 &gt; 10.10.10.102: ICMP echo reply, id 15, seq 1, length 64
+</code></pre><h1 id="node-to-internet">Node to internet</h1>
 <p>Host-network is responsible to forward and MASQUERADE and route back the
 traffic.</p>
 <pre tabindex="0"><code># K8s Node
@@ -515,7 +535,7 @@ br0   Out IP 8.8.8.8 &gt; 10.10.10.102: ICMP echo reply, id 13, seq 1, length 64
 eth01 Out IP 8.8.8.8 &gt; 10.10.10.102: ICMP echo reply, id 13, seq 1, length 64
 net0  In  IP 8.8.8.8 &gt; 10.10.10.102: ICMP echo reply, id 13, seq 1, length 64
 </code></pre><h2 id="local-k8s-api-access">Local k8s API access</h2>
-<p>Now, the traffic does not use expose port from docker to localhost, but the
+<p>That traffic cannot not use the expose port from docker to localhost, but now the
 network path is through the interface that connects host-network and clab-router.</p>
 <pre tabindex="0"><code>clab  Out IP 169.254.10.9.52556 &gt; 10.10.10.102.6443: Flags [S], seq 4290152719, win 56760, options [mss 9460,sackOK,TS val 2001072867 ecr 0,nop,wscale 7], length 0
 upstream In  IP 169.254.10.9.52556 &gt; 10.10.10.102.6443: Flags [S], seq 4290152719, win 56760, options [mss 9460,sackOK,TS val 2001072867 ecr 0,nop,wscale 7], length 0
